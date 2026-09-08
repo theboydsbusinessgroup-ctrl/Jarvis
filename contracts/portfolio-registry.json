@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "registry": [
+    {"id":"boyds_bar_os","repository":"theboydsbusinessgroup-ctrl/boyds-bar-os","display_name":"Boyd's Bar OS","integration":"push_telemetry"},
+    {"id":"productized_ai_service","repository":"theboydsbusinessgroup-ctrl/Productized-AI-service-","display_name":"Productized AI Service","integration":"push_telemetry"},
+    {"id":"service_arbitrage","repository":"theboydsbusinessgroup-ctrl/Service-arbitrage-","display_name":"Service Arbitrage","integration":"push_telemetry"},
+    {"id":"autonomous_product_discovery","repository":"theboydsbusinessgroup-ctrl/Autonomous-Product-Discovery-Engine","display_name":"Autonomous Product Discovery Engine","integration":"push_telemetry"},
+    {"id":"autonomous_trading","repository":"theboydsbusinessgroup-ctrl/Autonomous-Trading-System","display_name":"Autonomous Trading System","integration":"push_telemetry"},
+    {"id":"eventmatch","repository":"theboydsbusinessgroup-ctrl/EventMatch-","display_name":"EventMatch","integration":"push_telemetry"},
+    {"id":"wholesale_deal_engine","repository":"theboydsbusinessgroup-ctrl/Wholesale-Deal-Engine","display_name":"Wholesale Deal Engine","integration":"push_telemetry"},
+    {"id":"wealth_protection","repository":"theboydsbusinessgroup-ctrl/Wealth-Management-Protection-protocol","display_name":"Wealth Management Protection / Digital Estate Protection","integration":"push_telemetry"}
+  ],
+  "authority": "Domain repositories remain source of truth; JARVIS observes and coordinates only through explicit authority boundaries.",
+  "telemetry_endpoint_env": "JARVIS_INGEST_URL",
+  "telemetry_auth_env": "JARVIS_INGEST_TOKEN"
+}
