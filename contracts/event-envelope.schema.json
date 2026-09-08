@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jarvis/event-envelope/v1",
+  "title": "JARVIS Event Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "event_type", "source_system", "occurred_at", "received_at", "idempotency_key", "payload"],
+  "properties": {
+    "event_id": {"type": "string", "minLength": 1},
+    "event_type": {"type": "string", "minLength": 1},
+    "source_system": {"type": "string", "minLength": 1},
+    "source_event_id": {"type": ["string", "null"]},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "received_at": {"type": "string", "format": "date-time"},
+    "idempotency_key": {"type": "string", "minLength": 1},
+    "entity_type": {"type": ["string", "null"]},
+    "entity_id": {"type": ["string", "null"]},
+    "amount": {"type": ["number", "null"]},
+    "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
+    "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "evidence": {"type": "array", "items": {"type": "string"}},
+    "payload": {"type": "object"}
+  }
+}
