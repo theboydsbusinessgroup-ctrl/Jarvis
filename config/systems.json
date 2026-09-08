@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "systems": [
+    {
+      "id": "boyds_bar_os",
+      "name": "Boyd's Bar OS",
+      "repository": "theboydsbusinessgroup-ctrl/boyds-bar-os",
+      "category": "event_services",
+      "enabled": true,
+      "mode": "adapter_pending",
+      "source_of_truth": "source_system",
+      "authority_boundary": "boyds_bar_os"
+    },
+    {
+      "id": "productized_ai_service",
+      "name": "Productized AI Service",
+      "repository": "theboydsbusinessgroup-ctrl/Productized-AI-service-",
+      "category": "digital_services",
+      "enabled": true,
+      "mode": "adapter_pending",
+      "source_of_truth": "source_system",
+      "authority_boundary": "productized_ai_service"
+    },
+    {
+      "id": "service_arbitrage",
+      "name": "Service Arbitrage",
+      "repository": "theboydsbusinessgroup-ctrl/Service-arbitrage-",
+      "category": "digital_services",
+      "enabled": true,
+      "mode": "adapter_pending",
+      "source_of_truth": "source_system",
+      "authority_boundary": "service_arbitrage"
+    },
+    {
+      "id": "product_discovery",
+      "name": "Autonomous Product Discovery Engine",
+      "repository": "theboydsbusinessgroup-ctrl/Autonomous-Product-Discovery-Engine",
+      "category": "digital_products",
+      "enabled": true,
+      "mode": "adapter_pending",
+      "source_of_truth": "source_system",
+      "authority_boundary": "product_discovery"
+    },
+    {
+      "id": "autonomous_trading",
+      "name": "Autonomous Trading System",
+      "repository": "theboydsbusinessgroup-ctrl/Autonomous-Trading-System",
+      "category": "trading",
+      "enabled": true,
+      "mode": "observe_only",
+      "source_of_truth": "source_system",
+      "authority_boundary": "autonomous_trading_risk_engine"
+    },
+    {
+      "id": "eventmatch",
+      "name": "EventMatch",
+      "repository": "theboydsbusinessgroup-ctrl/EventMatch-",
+      "category": "marketplace",
+      "enabled": true,
+      "mode": "adapter_pending",
+      "source_of_truth": "source_system",
+      "authority_boundary": "eventmatch"
+    }
+  ]
+}
