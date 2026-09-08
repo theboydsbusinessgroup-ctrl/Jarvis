@@ -16,30 +16,32 @@ JARVIS is the orchestration and intelligence layer above the user's independent 
 - Autonomous Product Discovery Engine
 - Autonomous Trading System
 - EventMatch
-- **Wealth Management Protection Protocol / Digital Estate Protection**
+- Wealth Management Protection Protocol / Digital Estate Protection
+- **Revenue Recovery Engine**
 
-### New Wealth Protection module
+### Revenue Recovery module
 
-The Wealth Management Protection Protocol repository contains the protected product domain. JARVIS folds it into the command center as a first-class portfolio module.
-
-The customer-facing product remains **Digital Estate Protection**. The repository/project name is not intended to imply investment management, financial advice, or custody of wealth.
+Revenue Recovery is a first-class portfolio income engine. Its repository remains the source of truth for lead/customer opportunity records, recovery actions, attribution, reconciliation, and compliance state.
 
 JARVIS should surface:
 
-- MRR / ARR
-- Active and trial customers
-- Conversion and churn
-- Acquisition source
-- Contribution margin
-- AI, API, infrastructure, support, and other operating costs
-- Monitoring health and data freshness
-- Critical/high/medium alert counts
-- Human-review queue
-- Agent execution health
-- Integration health
-- Last successful monitoring run
+- active clients
+- recovery pipeline value
+- ready recovery opportunities
+- qualified opportunities
+- verified recovered revenue
+- recovery fees
+- contribution income
+- client conversion/recovery rate
+- average recovered value
+- agent execution health
+- human-review queue
+- suppression/opt-out counts
+- integration health
+- data freshness
+- last successful recovery run
 
-JARVIS should link back to the protected application for customer-level detail rather than copying unnecessary sensitive personal data into the central dashboard.
+JARVIS should never bypass Revenue Recovery suppression, compliance, attribution, or authority controls.
 
 ### Architecture rules
 
@@ -75,6 +77,10 @@ Separate realized cash, booked revenue, expected revenue, recurring revenue, exp
 ### Projects
 
 Each project gets a health card containing stage, automation level, revenue, margin, active exceptions, next milestone, and blockers.
+
+### Revenue Recovery
+
+Dedicated view for recovery pipeline, verified recovered revenue, contribution income, recovery rate, client health, agent execution, suppression/opt-out health, and human exceptions. Customer-level data stays in Revenue Recovery; JARVIS receives only required operational telemetry.
 
 ### Wealth Protection
 
@@ -119,17 +125,20 @@ integration_health
 data_freshness
 ```
 
-Customer-level data should use opaque IDs and deep links where possible. Do not move passwords, payment-card data, raw credentials, unnecessary identity data, or third-party secrets into JARVIS.
+## Revenue Recovery integration contract
+
+The Revenue Recovery repository defines the canonical telemetry and authority contract in `docs/jarvis-integration.md`. JARVIS should consume verified events and never directly execute customer-contact or attribution actions.
 
 ## Current build direction
 
 1. Establish the cross-system portfolio registry.
 2. Establish shared telemetry/event contracts.
 3. Add the Wealth Protection adapter and dashboard module.
-4. Normalize revenue and operating costs across projects.
-5. Add portfolio-level contribution income and cash-flow views.
-6. Add centralized exception routing.
-7. Add agent health and automation economics.
-8. Expand integrations only where they materially improve decision quality or reduce operator work.
+4. Add the Revenue Recovery adapter and dashboard module.
+5. Normalize revenue and operating costs across projects.
+6. Add portfolio-level contribution income and cash-flow views.
+7. Add centralized exception routing.
+8. Add agent health and automation economics.
+9. Expand integrations only where they materially improve decision quality or reduce operator work.
 
 Production integrations remain disabled until their credentials/connections and safety gates exist.
