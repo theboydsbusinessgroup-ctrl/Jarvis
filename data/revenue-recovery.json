@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "source": "revenue-recovery",
+  "generated_at": "2026-09-10T17:48:19Z",
+  "source_commit": "15020fcf97bf8f8a7693d3e67d30f55ab2453cc5",
+  "metrics": {
+    "canonical_opportunities": 2,
+    "ready_recovery_opportunities": 0,
+    "suppressed_opportunities": 2,
+    "recoverable_value_identified": 0.0,
+    "currency": "USD",
+    "verified_recovered_revenue": 0.0,
+    "revenue_truth": "verified_only"
+  },
+  "suppression_counts": {
+    "missing_customer_identity": 2
+  },
+  "blockers": [
+    "Current Stripe incomplete-payment signals lack customer/contact identity and are not eligible for recovery outreach."
+  ],
+  "recommended_actions": [
+    "Continue ingesting authoritative payment, invoice, and quote signals until an identified eligible recovery opportunity appears."
+  ],
+  "privacy": {
+    "customer_pii_included": false,
+    "raw_customer_records_included": false
+  }
+}

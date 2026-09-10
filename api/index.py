@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
 
@@ -11,14 +10,16 @@ from src.core.health_aggregator import aggregate, load_registry
 from src.core.policy_engine import PolicyEngine
 from src.core.resource_allocator import ResourceAllocator
 from src.core.revenue_ledger import RevenueLedger
+from src.integrations.revenue_recovery import load_recovery_snapshot
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "contracts" / "portfolio-registry.json"
 POLICY_PATH = ROOT / "config" / "autonomy-policy.json"
 ALLOCATION_PATH = ROOT / "config" / "resource-allocation.json"
 DASHBOARD_PATH = ROOT / "web" / "dashboard.html"
+RECOVERY_PATH = ROOT / "data" / "revenue-recovery.json"
 
-app = FastAPI(title="JARVIS Control Plane", version="0.1.0")
+app = FastAPI(title="JARVIS Control Plane", version="0.2.0")
 
 
 def build_state() -> dict[str, Any]:
@@ -26,15 +27,18 @@ def build_state() -> dict[str, Any]:
     health = aggregate(registry)
     allocator = ResourceAllocator.from_file(ALLOCATION_PATH)
     ledger = RevenueLedger()
+    recovery = load_recovery_snapshot(RECOVERY_PATH)
     return {
         "service": "jarvis-control-plane",
         "mode": "read_only",
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "portfolio": health,
         "allocation": allocator.config["baseline_percent"],
         "verified_revenue": ledger.summary(),
+        "revenue_recovery": recovery,
         "guardrails": {
             "revenue_truth": "verified_only",
+            "recovery_value_is_not_revenue": True,
             "domain_systems_authoritative": True,
             "writes_enabled": False,
         },
@@ -49,6 +53,7 @@ def health() -> dict[str, Any]:
         "service": state["service"],
         "mode": state["mode"],
         "project_count": state["portfolio"]["project_count"],
+        "recovery_signal_status": state["revenue_recovery"]["status"],
     }
 
 
@@ -79,6 +84,11 @@ def project(project_id: str) -> dict[str, Any]:
 @app.get("/api/revenue")
 def revenue() -> dict[str, Any]:
     return build_state()["verified_revenue"]
+
+
+@app.get("/api/recovery")
+def recovery() -> dict[str, Any]:
+    return build_state()["revenue_recovery"]
 
 
 @app.get("/api/allocation")
