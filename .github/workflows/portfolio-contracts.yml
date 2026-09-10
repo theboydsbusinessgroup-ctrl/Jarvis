@@ -3,19 +3,27 @@ name: Portfolio Contracts
 on:
   push:
     paths:
+      - 'api/**'
+      - 'web/**'
       - 'contracts/**'
       - 'config/**'
       - 'src/core/**'
       - 'scripts/**'
       - 'tests/**'
+      - 'requirements.txt'
+      - 'vercel.json'
       - '.github/workflows/portfolio-contracts.yml'
   pull_request:
     paths:
+      - 'api/**'
+      - 'web/**'
       - 'contracts/**'
       - 'config/**'
       - 'src/core/**'
       - 'scripts/**'
       - 'tests/**'
+      - 'requirements.txt'
+      - 'vercel.json'
   workflow_dispatch:
 
 jobs:
@@ -26,6 +34,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install runtime dependencies
+        run: pip install -r requirements.txt
       - name: Validate portfolio infrastructure
         run: |
           python -m unittest discover tests -v

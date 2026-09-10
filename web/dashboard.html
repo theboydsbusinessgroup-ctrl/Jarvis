@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>JARVIS Command Center</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;background:#07111d;color:#e8f1ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#10233c 0,#07111d 42%,#050a11 100%);min-height:100vh}.wrap{max-width:1100px;margin:auto;padding:22px}.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#83a9d7}.title{font-size:32px;font-weight:750;margin:3px 0}.muted{color:#89a0bb;font-size:13px}.pill{border:1px solid #274a70;background:#0e2034;padding:7px 10px;border-radius:999px;font-size:12px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:rgba(10,25,42,.88);border:1px solid #193855;border-radius:18px;padding:16px;box-shadow:0 16px 50px rgba(0,0,0,.18)}.metric{font-size:26px;font-weight:750;margin-top:5px}.label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#83a9d7}.section{margin-top:16px}.projects{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.project{padding:14px;border:1px solid #173652;border-radius:15px;background:#091827}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.name{font-weight:650}.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.tag{font-size:11px;padding:4px 7px;border-radius:999px;background:#10283e;color:#a9c9ec}.action{font-size:13px;line-height:1.45;color:#c9d8e8;margin-top:10px}.bar{height:7px;background:#102234;border-radius:99px;overflow:hidden;margin-top:9px}.fill{height:100%;background:linear-gradient(90deg,#5aa4ff,#8be8d0)}.notice{padding:12px 14px;border-radius:14px;border:1px solid #3a345b;background:#17172c;color:#cfd4ff;font-size:13px}.empty{color:#6f8aa6;font-size:13px;padding:12px 0}@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.projects{grid-template-columns:1fr}.title{font-size:28px}.wrap{padding:16px}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body><main class="wrap">
+<div class="top"><div><div class="eyebrow">Boyd's Business Operating System</div><div class="title">JARVIS Command Center</div><div class="muted">Read-only control plane · authoritative systems remain source of truth</div></div><div class="pill" id="status">Loading…</div></div>
+<div class="grid">
+<div class="card"><div class="label">Projects</div><div class="metric" id="projects">—</div></div>
+<div class="card"><div class="label">Production Live</div><div class="metric" id="live">—</div></div>
+<div class="card"><div class="label">Verified Revenue</div><div class="metric" id="revenue">$0</div></div>
+<div class="card"><div class="label">Needs Eric</div><div class="metric" id="needs">—</div></div>
+</div>
+<div class="section card"><div class="row"><div><div class="label">Resource Allocation</div><div class="muted">Current bounded baseline</div></div></div><div id="allocation"></div></div>
+<div class="section card"><div class="label">Priority Action Queue</div><div id="actions"></div></div>
+<div class="section"><div class="projects" id="project-list"></div></div>
+</main>
+<script>
+const nice=s=>String(s||'').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
+async function boot(){
+ try{
+  const r=await fetch('/api/control-plane'); if(!r.ok) throw new Error('API unavailable'); const d=await r.json(); const p=d.portfolio;
+  document.getElementById('status').textContent='SYSTEMS ONLINE';
+  document.getElementById('projects').textContent=p.project_count;
+  document.getElementById('live').textContent=(p.counts.deployment||{}).production_live||0;
+  document.getElementById('revenue').textContent='$'+Number(d.verified_revenue.gross_revenue||0).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2});
+  document.getElementById('needs').textContent=p.needs_user.length;
+  const alloc=document.getElementById('allocation');
+  alloc.innerHTML=Object.entries(d.allocation).map(([k,v])=>`<div style="margin-top:12px"><div class="row"><span class="muted">${nice(k)}</span><strong>${v}%</strong></div><div class="bar"><div class="fill" style="width:${v}%"></div></div></div>`).join('');
+  const actions=document.getElementById('actions');
+  actions.innerHTML=p.action_queue.slice(0,8).map(x=>`<div class="project" style="margin-top:9px"><div class="row"><span class="name">${x.display_name}</span>${x.needs_user?'<span class="tag">Needs Eric</span>':''}</div><div class="action">${x.next_action}</div></div>`).join('')||'<div class="empty">No queued actions.</div>';
+  const list=document.getElementById('project-list');
+  list.innerHTML=p.projects.map(x=>`<div class="project"><div class="row"><span class="name">${x.display_name}</span><span class="tag">${nice(x.lifecycle)}</span></div><div class="tags"><span class="tag">${nice(x.deployment)}</span><span class="tag">${nice(x.revenue)}</span><span class="tag">CI: ${nice(x.ci)}</span></div><div class="action">${x.next_action||''}</div></div>`).join('');
+ }catch(e){document.getElementById('status').textContent='CONTROL PLANE ERROR';document.getElementById('actions').innerHTML='<div class="notice">'+e.message+'</div>'}
+}
+boot();
+</script></body></html>
