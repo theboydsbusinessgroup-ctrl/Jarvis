@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jarvis/project-health/v1",
+  "title": "JARVIS Project Health Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "project_id", "observed_at", "lifecycle", "health", "deployment", "revenue", "blockers"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "project_id": {"type": "string", "minLength": 1},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "lifecycle": {"type": "string", "enum": ["backlog", "building", "testing", "revenue_ready", "live", "paused"]},
+    "health": {"type": "string", "enum": ["healthy", "degraded", "blocked", "unknown"]},
+    "deployment": {"type": "string", "enum": ["not_deployable", "build_ready", "preview_live", "production_live", "deployment_blocked"]},
+    "revenue": {"type": "string", "enum": ["pre_revenue", "monetization_setup", "first_dollar", "generating_revenue", "profitable"]},
+    "ci": {"type": ["string", "null"], "enum": ["passing", "failing", "pending", "not_configured", null]},
+    "revenue_usd": {"type": "number", "minimum": 0},
+    "profit_usd": {"type": ["number", "null"]},
+    "funnel": {"type": "object", "additionalProperties": {"type": "number"}},
+    "blockers": {"type": "array", "items": {"type": "string"}},
+    "next_action": {"type": ["string", "null"]},
+    "needs_user": {"type": "boolean", "default": false},
+    "evidence": {"type": "array", "items": {"type": "string"}}
+  }
+}
