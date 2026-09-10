@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "decision_order": ["global_prohibitions", "project_gates", "explicit_grants", "default_tier"],
+  "decisions": ["execute", "require_approval", "prohibited"],
+  "global": {
+    "execute": [
+      "read_data", "analyze", "research", "classify", "calculate", "report", "run_tests", "fix_ci", "commit_code", "deploy_existing_project", "create_internal_documentation", "update_internal_registry", "monitor_health", "reconcile_verified_events"
+    ],
+    "require_approval": [
+      "new_spend", "new_provider_purchase", "self_purchase", "credential_change", "account_security_change", "legal_commitment", "high_impact_external_action", "destructive_operation", "material_pricing_change", "new_financial_account", "live_financial_transaction"
+    ],
+    "prohibited": [
+      "invent_revenue", "invent_customer_activity", "invent_approval", "invent_deployment_state", "expose_secret", "change_stripe_legal_identity_without_explicit_instruction", "bypass_authentication_or_captcha"
+    ]
+  },
+  "grants": {
+    "approved_outreach": {"decision": "execute", "conditions": ["message_within_existing_offer_and_brand_rules", "no_new_spend"]},
+    "follow_up_existing_prospect": {"decision": "execute", "conditions": ["within_existing_follow_up_policy", "no_customer_opt_out"]},
+    "production_deploy": {"decision": "execute", "conditions": ["tests_or_ci_pass", "no_secret_exposure", "no_new_spend"]}
+  },
+  "project_gates": {
+    "service_arbitrage": {
+      "enable_customer_payment": {"decision": "require_approval", "conditions": ["approved_provider_count>=2", "margin_gate_passes", "scope_gate_passes"]},
+      "provider_purchase": {"decision": "require_approval", "conditions": ["exact_spend_has_existing_authorization"]}
+    },
+    "autonomous_trading": {
+      "research": {"decision": "execute"},
+      "backtest": {"decision": "execute"},
+      "paper_trade": {"decision": "execute"},
+      "live_trade": {"decision": "prohibited", "conditions": ["until_separate_validation_and_live_allocation_authorization"]}
+    },
+    "wholesale_deal_engine": {
+      "analyze_property": {"decision": "execute"},
+      "draft_offer": {"decision": "execute"},
+      "sign_contract": {"decision": "require_approval"},
+      "submit_binding_offer": {"decision": "require_approval"}
+    },
+    "wealth_protection": {
+      "monitor_and_analyze": {"decision": "execute"},
+      "move_money": {"decision": "require_approval"},
+      "change_account_security": {"decision": "require_approval"}
+    },
+    "etsy_connector": {
+      "oauth_authorization": {"decision": "require_approval", "conditions": ["user_authentication_required"]},
+      "publish_listing": {"decision": "execute", "conditions": ["listing_content_preapproved_or_within_existing_product_scope", "no_new_spend"]}
+    }
+  },
+  "default_tier": {
+    "GREEN": "execute",
+    "YELLOW": "require_approval",
+    "RED": "require_approval",
+    "UNKNOWN": "require_approval"
+  }
+}

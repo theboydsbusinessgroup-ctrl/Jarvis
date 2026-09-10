@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'contracts/**'
+      - 'config/**'
       - 'src/core/**'
       - 'scripts/**'
       - 'tests/**'
@@ -11,6 +12,7 @@ on:
   pull_request:
     paths:
       - 'contracts/**'
+      - 'config/**'
       - 'src/core/**'
       - 'scripts/**'
       - 'tests/**'
@@ -32,3 +34,5 @@ jobs:
           python -m json.tool contracts/event-envelope.schema.json > /dev/null
           python -m json.tool contracts/project-health.schema.json > /dev/null
           python -m json.tool contracts/revenue-event.schema.json > /dev/null
+          python -m json.tool contracts/autonomy-policy.schema.json > /dev/null
+          python -m json.tool config/autonomy-policy.json > /dev/null
