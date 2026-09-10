@@ -58,29 +58,38 @@ class ResourceAllocator:
         for k in baseline:
             blended = inertia * previous[k] + (1 - inertia) * target[k]
             delta = max(-max_shift, min(max_shift, blended - previous[k]))
-            lo = float(self.config["bounds_percent"][k]["min"])
-            hi = float(self.config["bounds_percent"][k]["max"])
+            lo = max(float(self.config["bounds_percent"][k]["min"]), previous[k] - max_shift)
+            hi = min(float(self.config["bounds_percent"][k]["max"]), previous[k] + max_shift)
             proposed[k] = max(lo, min(hi, previous[k] + delta))
 
-        proposed = self._normalize_with_bounds(proposed)
+        proposed = self._normalize_with_bounds(proposed, previous)
         changed = any(abs(proposed[k] - previous[k]) >= 0.01 for k in proposed)
         return {"allocation": proposed, "scores": scores, "changed": changed, "reason": "material_evidence_rebalance"}
 
-    def _normalize_with_bounds(self, values: Mapping[str, float]) -> dict[str, float]:
+    def _normalize_with_bounds(self, values: Mapping[str, float], previous: Mapping[str, float]) -> dict[str, float]:
         result = {k: float(v) for k, v in values.items()}
-        for _ in range(20):
+        max_shift = float(self.config["max_shift_per_cycle"])
+        effective_bounds = {
+            k: (
+                max(float(self.config["bounds_percent"][k]["min"]), float(previous[k]) - max_shift),
+                min(float(self.config["bounds_percent"][k]["max"]), float(previous[k]) + max_shift),
+            )
+            for k in result
+        }
+        for _ in range(50):
             diff = 100.0 - sum(result.values())
-            if abs(diff) < 0.001:
+            if abs(diff) < 0.0001:
                 break
             if diff > 0:
-                candidates = [k for k in result if result[k] < float(self.config["bounds_percent"][k]["max"])]
+                candidates = [k for k in result if result[k] < effective_bounds[k][1] - 1e-9]
             else:
-                candidates = [k for k in result if result[k] > float(self.config["bounds_percent"][k]["min"])]
+                candidates = [k for k in result if result[k] > effective_bounds[k][0] + 1e-9]
             if not candidates:
-                break
+                raise ValueError("Cannot normalize allocation within configured bounds and shift caps")
             share = diff / len(candidates)
             for k in candidates:
-                lo = float(self.config["bounds_percent"][k]["min"])
-                hi = float(self.config["bounds_percent"][k]["max"])
+                lo, hi = effective_bounds[k]
                 result[k] = max(lo, min(hi, result[k] + share))
+        if abs(sum(result.values()) - 100.0) >= 0.01:
+            raise ValueError("Allocation normalization did not converge to 100")
         return {k: round(v, 2) for k, v in result.items()}
