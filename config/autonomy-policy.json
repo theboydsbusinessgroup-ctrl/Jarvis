@@ -31,7 +31,12 @@
       "refresh_existing_oauth",
       "use_existing_connector",
       "prepare_scoped_access_plan",
-      "attempt_delegated_authorization"
+      "attempt_delegated_authorization",
+      "create_internal_skill",
+      "create_internal_adapter",
+      "create_legitimate_workaround",
+      "attempt_normal_browser_flow",
+      "provision_brand_safe_subsurface"
     ],
     "require_approval": [
       "new_spend",
@@ -93,6 +98,16 @@
         "no_new_spend",
         "least_privilege",
         "use_existing_authorization_first"
+      ]
+    },
+    "universal_roadblock_resolution": {
+      "decision": "execute",
+      "conditions": [
+        "applies_to_all_live_systems",
+        "preserve_existing_safety_gates",
+        "no_new_spend_without_authorization",
+        "no_security_or_verification_bypass",
+        "prefer_reusable_skill_or_adapter_before_human_escalation"
       ]
     }
   },
