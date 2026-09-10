@@ -5,15 +5,15 @@ on:
     paths:
       - 'contracts/**'
       - 'src/core/**'
-      - 'scripts/portfolio_health.py'
-      - 'tests/test_health_aggregator.py'
+      - 'scripts/**'
+      - 'tests/**'
       - '.github/workflows/portfolio-contracts.yml'
   pull_request:
     paths:
       - 'contracts/**'
       - 'src/core/**'
-      - 'scripts/portfolio_health.py'
-      - 'tests/test_health_aggregator.py'
+      - 'scripts/**'
+      - 'tests/**'
   workflow_dispatch:
 
 jobs:
@@ -24,10 +24,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validate registry and aggregation
+      - name: Validate portfolio infrastructure
         run: |
-          python -m unittest tests/test_health_aggregator.py -v
+          python -m unittest discover tests -v
           python scripts/portfolio_health.py > /tmp/portfolio-health.json
           python -m json.tool contracts/portfolio-registry.json > /dev/null
           python -m json.tool contracts/event-envelope.schema.json > /dev/null
           python -m json.tool contracts/project-health.schema.json > /dev/null
+          python -m json.tool contracts/revenue-event.schema.json > /dev/null
