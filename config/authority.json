@@ -3,20 +3,44 @@
   "tiers": {
     "GREEN": {
       "description": "Low-risk autonomous operations",
-      "examples": ["read", "refresh", "classify", "calculate", "forecast", "report", "bounded_retry", "analytics"]
+      "examples": [
+        "read",
+        "refresh",
+        "classify",
+        "calculate",
+        "forecast",
+        "report",
+        "bounded_retry",
+        "analytics"
+      ]
     },
     "YELLOW": {
       "description": "Material operations requiring approval unless a future explicit policy grants authority",
-      "examples": ["material_spend", "material_pricing_change", "campaign_change", "provider_change", "reputational_publish", "meaningful_capital_allocation"]
+      "examples": [
+        "material_spend",
+        "material_pricing_change",
+        "campaign_change",
+        "provider_change",
+        "reputational_publish",
+        "meaningful_capital_allocation"
+      ]
     },
     "RED": {
       "description": "Human-only by default",
-      "examples": ["large_transfer", "credential_change", "account_security_change", "destructive_operation", "legal_commitment", "high_risk_financial_action"]
+      "examples": [
+        "large_transfer",
+        "credential_change",
+        "account_security_change",
+        "destructive_operation",
+        "legal_commitment",
+        "high_risk_financial_action"
+      ]
     }
   },
   "special_rules": {
     "trading": "JARVIS may observe and recommend; any execution request must pass through Autonomous Trading System risk controls.",
     "payments": "JARVIS may reconcile connected payment events; money movement requires explicit authorized integration and policy.",
-    "missing_integration": "Never represent unavailable data as real-time."
+    "missing_integration": "Never represent unavailable data as real-time.",
+    "access_broker": "Before escalating a login or permission blocker, JARVIS must exhaust safe delegated access paths: active connectors, existing OAuth refresh, supported app authorization, scoped tokens or service accounts where appropriate, and least-privilege API access. It must never bypass MFA, passkeys, CAPTCHA, account security, or impersonate the user. Escalate only when a human authorization ceremony or secret selection is genuinely unavoidable."
   }
 }
