@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "objective": "first_dollar_distribution",
+  "brand_separation_required": true,
+  "existing_brand_exclusions": ["The Boyd's Bar"],
+  "provisioning_order": ["existing_brand_safe_surface", "official_api_subsurface", "delegated_oauth", "browser_normal_flow", "human_checkpoint"],
+  "human_only_checkpoints": ["login_secret", "captcha", "mfa", "passkey", "email_verification", "phone_verification", "identity_verification", "legal_attestation", "payment"],
+  "prohibited": ["captcha_bypass", "mfa_bypass", "passkey_bypass", "fake_identity", "fake_engagement", "spam", "rate_limit_evasion"],
+  "metrics": ["outbound_clicks", "profile_visits", "saves", "checkout_starts", "verified_purchases"],
+  "stop_rule": "deprioritize_channels_that_fail_to_generate_qualified_traffic_after_sufficient_evidence"
+}
