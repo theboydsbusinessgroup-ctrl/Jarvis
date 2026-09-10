@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "baseline_percent": {
+    "shared_infrastructure_jarvis": 35,
+    "media_engine": 25,
+    "revenue_recovery": 20,
+    "eventmatch": 10,
+    "rotating_cleanup": 10
+  },
+  "bounds_percent": {
+    "shared_infrastructure_jarvis": {"min": 20, "max": 45},
+    "media_engine": {"min": 10, "max": 35},
+    "revenue_recovery": {"min": 10, "max": 30},
+    "eventmatch": {"min": 5, "max": 20},
+    "rotating_cleanup": {"min": 5, "max": 20}
+  },
+  "bucket_projects": {
+    "shared_infrastructure_jarvis": ["jarvis", "etsy_connector"],
+    "media_engine": ["autonomous_media_engine"],
+    "revenue_recovery": ["revenue_recovery"],
+    "eventmatch": ["eventmatch"],
+    "rotating_cleanup": ["boyds_bar_os", "wholesale_deal_engine", "wealth_protection", "autonomous_trading", "digital_asset_licensing"]
+  },
+  "weights": {
+    "verified_revenue": 3.0,
+    "conversion_signal": 2.0,
+    "user_blocker": 2.5,
+    "production_failure": 3.0,
+    "near_revenue": 1.8,
+    "deployment_readiness": 1.2,
+    "automation_leverage": 1.2,
+    "strategic_reuse": 1.5,
+    "stale_no_signal": -1.0,
+    "high_risk": -1.5
+  },
+  "inertia": 0.65,
+  "max_shift_per_cycle": 8,
+  "minimum_evidence_count_for_signal_shift": 2,
+  "rules": [
+    "Never allocate based on projected revenue alone.",
+    "Verified revenue, conversion, CI/deployment failures, and explicit blockers outrank speculative opportunity.",
+    "A single noisy metric cannot move a bucket by more than max_shift_per_cycle.",
+    "Critical-risk systems may gain engineering capacity for safety/validation but never authority to execute high-risk actions.",
+    "Live revenue incidents can temporarily override baseline allocation; passive waiting cannot."
+  ]
+}

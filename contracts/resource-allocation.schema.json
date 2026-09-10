@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jarvis/resource-allocation/v1",
+  "title": "JARVIS Dynamic Resource Allocation Config",
+  "type": "object",
+  "required": ["schema_version", "baseline_percent", "bounds_percent", "bucket_projects", "weights", "inertia", "max_shift_per_cycle", "minimum_evidence_count_for_signal_shift"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "baseline_percent": {"type": "object"},
+    "bounds_percent": {"type": "object"},
+    "bucket_projects": {"type": "object"},
+    "weights": {"type": "object"},
+    "inertia": {"type": "number", "minimum": 0, "maximum": 1},
+    "max_shift_per_cycle": {"type": "number", "minimum": 0, "maximum": 25},
+    "minimum_evidence_count_for_signal_shift": {"type": "integer", "minimum": 1}
+  }
+}

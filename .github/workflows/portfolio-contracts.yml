@@ -35,4 +35,6 @@ jobs:
           python -m json.tool contracts/project-health.schema.json > /dev/null
           python -m json.tool contracts/revenue-event.schema.json > /dev/null
           python -m json.tool contracts/autonomy-policy.schema.json > /dev/null
+          python -m json.tool contracts/resource-allocation.schema.json > /dev/null
           python -m json.tool config/autonomy-policy.json > /dev/null
+          python -m json.tool config/resource-allocation.json > /dev/null
