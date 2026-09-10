@@ -4,12 +4,14 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
 
 from src.core.health_aggregator import aggregate, load_registry
 from src.core.policy_engine import PolicyEngine
 from src.core.resource_allocator import ResourceAllocator
 from src.core.revenue_ledger import RevenueLedger
+from src.core.command_router import route_command
 from src.integrations.revenue_recovery import load_recovery_snapshot
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -105,6 +107,16 @@ def allocation() -> dict[str, Any]:
 def policy(project_id: str, action: str, authority_tier: str = "UNKNOWN") -> dict[str, Any]:
     engine = PolicyEngine.from_file(POLICY_PATH)
     return engine.decide(action, project_id=project_id, context={"authority_tier": authority_tier})
+
+
+class VoiceCommandRequest(BaseModel):
+    transcript: str
+
+
+@app.post("/api/command")
+def command(request: VoiceCommandRequest) -> dict[str, Any]:
+    state = build_state()
+    return route_command(request.transcript, state).to_dict()
 
 
 @app.get("/", response_class=HTMLResponse)
