@@ -1,0 +1,33 @@
+name: Portfolio Contracts
+
+on:
+  push:
+    paths:
+      - 'contracts/**'
+      - 'src/core/**'
+      - 'scripts/portfolio_health.py'
+      - 'tests/test_health_aggregator.py'
+      - '.github/workflows/portfolio-contracts.yml'
+  pull_request:
+    paths:
+      - 'contracts/**'
+      - 'src/core/**'
+      - 'scripts/portfolio_health.py'
+      - 'tests/test_health_aggregator.py'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate registry and aggregation
+        run: |
+          python -m unittest tests/test_health_aggregator.py -v
+          python scripts/portfolio_health.py > /tmp/portfolio-health.json
+          python -m json.tool contracts/portfolio-registry.json > /dev/null
+          python -m json.tool contracts/event-envelope.schema.json > /dev/null
+          python -m json.tool contracts/project-health.schema.json > /dev/null
