@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi.responses import HTMLResponse
 
 from src.core.health_aggregator import aggregate, load_registry
@@ -13,6 +13,7 @@ from src.core.resource_allocator import ResourceAllocator
 from src.core.revenue_ledger import RevenueLedger
 from src.core.command_router import route_command
 from src.integrations.revenue_recovery import load_recovery_snapshot
+from src.integrations.second_brain import call_second_brain
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "contracts" / "portfolio-registry.json"
@@ -21,7 +22,7 @@ ALLOCATION_PATH = ROOT / "config" / "resource-allocation.json"
 DASHBOARD_PATH = ROOT / "web" / "dashboard.html"
 RECOVERY_PATH = ROOT / "data" / "revenue-recovery.json"
 
-app = FastAPI(title="JARVIS Control Plane", version="0.2.0")
+app = FastAPI(title="JARVIS Control Plane", version="0.3.0")
 
 
 def build_state() -> dict[str, Any]:
@@ -33,7 +34,7 @@ def build_state() -> dict[str, Any]:
     return {
         "service": "jarvis-control-plane",
         "mode": "read_only",
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "portfolio": health,
         "allocation": allocator.config["baseline_percent"],
         "verified_revenue": ledger.summary(),
@@ -43,6 +44,7 @@ def build_state() -> dict[str, Any]:
             "recovery_value_is_not_revenue": True,
             "domain_systems_authoritative": True,
             "writes_enabled": False,
+            "second_brain_advisory_only": True,
         },
     }
 
@@ -117,6 +119,29 @@ class VoiceCommandRequest(BaseModel):
 def command(request: VoiceCommandRequest) -> dict[str, Any]:
     state = build_state()
     return route_command(request.transcript, state).to_dict()
+
+
+class SecondBrainRequest(BaseModel):
+    task: str = Field(min_length=3, max_length=12000)
+    decision_criteria: str = Field(default="", max_length=4000)
+    evidence: str = Field(default="", max_length=16000)
+    review_mode: Literal["parallel", "adversarial"] = "parallel"
+
+
+@app.post("/api/second-brain")
+def second_brain(request: SecondBrainRequest) -> dict[str, Any]:
+    """Advisory-only Claude review. This endpoint cannot execute external actions."""
+    result = call_second_brain(
+        task=request.task,
+        decision_criteria=request.decision_criteria,
+        evidence=request.evidence,
+        review_mode=request.review_mode,
+    )
+    if result.status == "not_configured":
+        raise HTTPException(status_code=503, detail=result.error)
+    if result.status == "error":
+        raise HTTPException(status_code=502, detail=result.error)
+    return result.to_dict()
 
 
 @app.get("/", response_class=HTMLResponse)
