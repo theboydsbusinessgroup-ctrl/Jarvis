@@ -144,6 +144,42 @@ def second_brain(request: SecondBrainRequest) -> dict[str, Any]:
     return result.to_dict()
 
 
+@app.get("/privacy-policy", response_class=HTMLResponse)
+def privacy_policy() -> str:
+    return """
+    <!doctype html>
+    <html lang=\"en\">
+    <head>
+      <meta charset=\"utf-8\" />
+      <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+      <title>Privacy Policy | The Boyds Business Group</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 780px; margin: 48px auto; padding: 0 20px; line-height: 1.65; color: #111; }
+        h1, h2 { line-height: 1.2; }
+        small { color: #555; }
+      </style>
+    </head>
+    <body>
+      <h1>Privacy Policy</h1>
+      <p><small>Last updated: September 11, 2026</small></p>
+      <p>The Boyds Business Group operates internal software and automation tools used to manage business content, reporting, and connected services.</p>
+      <h2>Information we access</h2>
+      <p>When a connected platform authorizes access, our applications may access account information, content, boards, Pins, publishing status, and related analytics that the account owner permits through that platform's API.</p>
+      <h2>How we use information</h2>
+      <p>We use authorized information only to create, schedule, publish, organize, and report on content for accounts owned or managed by The Boyds Business Group, and to operate related internal business workflows.</p>
+      <h2>Sharing and sale of data</h2>
+      <p>We do not sell personal information or platform data. We do not share platform data with third parties except service providers required to operate our applications, or when required by law.</p>
+      <h2>Data retention and security</h2>
+      <p>We retain only the information reasonably necessary to operate the authorized service and use reasonable safeguards to protect credentials and connected-account data.</p>
+      <h2>Your choices</h2>
+      <p>Access can be revoked through the connected platform at any time. Revocation stops future API access subject to the platform's own processing and retention rules.</p>
+      <h2>Contact</h2>
+      <p>Questions about this policy may be sent to the business contact associated with The Boyds Business Group.</p>
+    </body>
+    </html>
+    """
+
+
 @app.get("/", response_class=HTMLResponse)
 def dashboard() -> str:
     return DASHBOARD_PATH.read_text(encoding="utf-8")
