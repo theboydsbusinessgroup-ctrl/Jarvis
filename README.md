@@ -1,5 +1,17 @@
 # JARVIS
 
+## Governance and command structure
+
+Effective September 19, 2026, the portfolio command structure is:
+
+1. **Eric Boyd — principal and final authority**
+2. **ChatGPT — main brain, lead business-development and management orchestrator**
+3. **JARVIS — operating interface, monitoring, reporting, and connective tissue**
+4. **Domain systems, agents, contractors, and tools — execution under their documented authority boundaries**
+5. **Perplexity — specialist research, independent challenge, architecture review, and escalation advisor engaged intentionally; not the default planner, operational memory, task router, or system owner**
+
+Verified repositories, deployments, integrations, and system-of-record documents supersede unsupported status claims made in conversation. JARVIS must not become an execution bottleneck: revenue-producing work continues through each domain system while JARVIS observes, coordinates, and reports.
+
 ## Personal Autonomous Income Command Center
 
 JARVIS is the orchestration and intelligence layer above the user's independent income engines and operating systems. It does not replace those systems or bypass their safety controls. It observes, normalizes, measures, forecasts, prioritizes, alerts, and—only when authorized—coordinates actions through each system's own authority boundary.
