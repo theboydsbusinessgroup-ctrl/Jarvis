@@ -71,6 +71,8 @@ JARVIS should never bypass Revenue Recovery suppression, compliance, attribution
 11. Connector actions pass through a shared tool policy boundary; unknown tools fail closed.
 12. Approval-required actions persist the exact proposed payload and workflow checkpoint before review, then resume from that checkpoint.
 13. Mutating connector retries reuse one idempotency key and must pass provider-specific reliability tests before live-write authority is enabled.
+14. Agent delegation is bounded by worker-count and delegation-depth policy; critical context is fingerprinted and preserved.
+15. MCP is the tool/data boundary; A2A is the agent-to-agent boundary. Transport choice never expands authority.
 
 ## Dashboard architecture
 
@@ -157,5 +159,6 @@ The Revenue Recovery repository defines the canonical telemetry and authority co
 8. Add agent health and automation economics.
 9. Expand integrations only where they materially improve decision quality or reduce operator work.
 10. Promote connectors from read-only/dry-run only after the Autonomy Control Plane and connector reliability contract tests pass.
+11. Pilot MCP/A2A protocol boundaries on one specialist/reviewer workflow and expand only when measured reliability improves.
 
 Production integrations remain disabled until their credentials/connections and safety gates exist.
