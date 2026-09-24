@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jarvis/tool-policy/v1",
+  "title": "JARVIS Tool Policy",
+  "type": "object",
+  "required": ["schema_version", "default", "tools"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "default": {"$ref": "#/$defs/rule"},
+    "tools": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/rule"}
+    }
+  },
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "required": ["risk", "authority_tier", "policy_action"],
+      "properties": {
+        "risk": {"enum": ["GREEN", "YELLOW", "RED"]},
+        "authority_tier": {"enum": ["GREEN", "YELLOW", "RED", "UNKNOWN"]},
+        "policy_action": {"type": "string", "minLength": 1},
+        "description": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

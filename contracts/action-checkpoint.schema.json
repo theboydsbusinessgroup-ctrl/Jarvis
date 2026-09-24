@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jarvis/action-checkpoint/v1",
+  "title": "JARVIS Action Checkpoint",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "operation_id",
+    "idempotency_key",
+    "connector",
+    "operation",
+    "risk",
+    "policy_action",
+    "payload",
+    "workflow_state",
+    "policy",
+    "status",
+    "attempt_count",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "operation_id": {"type": "string", "minLength": 1},
+    "idempotency_key": {"type": "string", "minLength": 1},
+    "connector": {"type": "string", "minLength": 1},
+    "operation": {"type": "string", "minLength": 1},
+    "tool_key": {"type": "string"},
+    "risk": {"enum": ["GREEN", "YELLOW", "RED"]},
+    "policy_action": {"type": "string", "minLength": 1},
+    "project_id": {"type": ["string", "null"]},
+    "payload": {"type": "object"},
+    "workflow_state": {"type": "object"},
+    "context": {"type": "object"},
+    "policy": {"type": "object"},
+    "status": {
+      "enum": ["pending_approval", "approved", "rejected", "prohibited", "failed", "executed"]
+    },
+    "approval": {"type": ["object", "null"]},
+    "attempt_count": {"type": "integer", "minimum": 0},
+    "result": {},
+    "error": {"type": ["object", "null"]},
+    "created_at": {"type": "string"},
+    "updated_at": {"type": "string"},
+    "executed_at": {"type": "string"}
+  }
+}

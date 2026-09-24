@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "default": {
+    "risk": "RED",
+    "authority_tier": "RED",
+    "policy_action": "high_impact_external_action",
+    "description": "Unknown tools fail closed and require approval."
+  },
+  "tools": {
+    "github.read": {
+      "risk": "GREEN",
+      "authority_tier": "GREEN",
+      "policy_action": "read_data",
+      "description": "Repository reads and metadata queries."
+    },
+    "github.commit": {
+      "risk": "YELLOW",
+      "authority_tier": "YELLOW",
+      "policy_action": "commit_code",
+      "description": "Reversible code changes on a branch."
+    },
+    "github.merge": {
+      "risk": "RED",
+      "authority_tier": "RED",
+      "policy_action": "high_impact_external_action",
+      "description": "Merge changes into a protected/default branch."
+    },
+    "github.delete": {
+      "risk": "RED",
+      "authority_tier": "RED",
+      "policy_action": "destructive_operation",
+      "description": "Delete repository content."
+    },
+    "gmail.read": {
+      "risk": "GREEN",
+      "authority_tier": "GREEN",
+      "policy_action": "read_data",
+      "description": "Read or search mailbox data."
+    },
+    "gmail.draft": {
+      "risk": "YELLOW",
+      "authority_tier": "YELLOW",
+      "policy_action": "analyze",
+      "description": "Create a draft without sending."
+    },
+    "gmail.send": {
+      "risk": "RED",
+      "authority_tier": "RED",
+      "policy_action": "high_impact_external_action",
+      "description": "Send an external message."
+    },
+    "deployment.preview": {
+      "risk": "YELLOW",
+      "authority_tier": "YELLOW",
+      "policy_action": "deploy_existing_project",
+      "description": "Deploy an existing project to a non-production environment."
+    },
+    "deployment.production": {
+      "risk": "YELLOW",
+      "authority_tier": "YELLOW",
+      "policy_action": "production_deploy",
+      "description": "Production deploy gated by CI, secret, and spend checks."
+    },
+    "stripe.read": {
+      "risk": "GREEN",
+      "authority_tier": "GREEN",
+      "policy_action": "read_data",
+      "description": "Read payment and account records."
+    },
+    "stripe.write": {
+      "risk": "RED",
+      "authority_tier": "RED",
+      "policy_action": "live_financial_transaction",
+      "description": "Create or mutate financial/payment state."
+    },
+    "social.publish": {
+      "risk": "RED",
+      "authority_tier": "RED",
+      "policy_action": "high_impact_external_action",
+      "description": "Publish externally visible content."
+    },
+    "etsy.publish_listing": {
+      "risk": "YELLOW",
+      "authority_tier": "YELLOW",
+      "policy_action": "publish_listing",
+      "description": "Publish a listing within an already approved product scope."
+    },
+    "security.expose_secret": {
+      "risk": "RED",
+      "authority_tier": "RED",
+      "policy_action": "expose_secret",
+      "description": "Test-only mapping proving prohibited policy precedence."
+    }
+  }
+}
