@@ -68,6 +68,9 @@ JARVIS should never bypass Revenue Recovery suppression, compliance, attribution
 8. Missing integrations are represented honestly as unavailable or estimated—not fabricated as real-time data.
 9. Sensitive customer data is minimized, compartmentalized, encrypted, and accessed by least privilege.
 10. JARVIS is the visibility/orchestration layer; domain repositories remain the source of truth.
+11. Connector actions pass through a shared tool policy boundary; unknown tools fail closed.
+12. Approval-required actions persist the exact proposed payload and workflow checkpoint before review, then resume from that checkpoint.
+13. Mutating connector retries reuse one idempotency key and must pass provider-specific reliability tests before live-write authority is enabled.
 
 ## Dashboard architecture
 
@@ -153,5 +156,6 @@ The Revenue Recovery repository defines the canonical telemetry and authority co
 7. Add centralized exception routing.
 8. Add agent health and automation economics.
 9. Expand integrations only where they materially improve decision quality or reduce operator work.
+10. Promote connectors from read-only/dry-run only after the Autonomy Control Plane and connector reliability contract tests pass.
 
 Production integrations remain disabled until their credentials/connections and safety gates exist.
