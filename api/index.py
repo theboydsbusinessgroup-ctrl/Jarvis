@@ -48,6 +48,8 @@ def build_state() -> dict[str, Any]:
             "action_control_plane": "implemented_not_wired_to_live_connectors",
             "tool_policy_default": "fail_closed",
             "approval_checkpoint_backend": "local_adapter_only_shared_backend_required_for_serverless_writes",
+            "orchestration_gate": "implemented_bounded_pilot",
+            "protocol_boundary": "mcp_tools_data_a2a_agents_contract_only",
         },
     }
 
