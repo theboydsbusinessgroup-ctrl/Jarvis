@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "max_parallel_workers": 4,
+  "max_delegation_depth": 2,
+  "allowed_target_roles": [
+    "specialist",
+    "reviewer"
+  ],
+  "required_context_fields": [
+    "task_id",
+    "objective",
+    "constraints",
+    "authority_context",
+    "evidence_refs"
+  ],
+  "preserve_context_fields": [
+    "task_id",
+    "trace_id",
+    "project_id",
+    "objective",
+    "constraints",
+    "authority_context",
+    "evidence_refs"
+  ]
+}
