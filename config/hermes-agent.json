@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "enabled": false,
+  "mode": "dry_run",
+  "role": "bounded_worker",
+  "api": {
+    "base_url_env": "HERMES_API_URL",
+    "key_env": "HERMES_API_KEY",
+    "model_env": "HERMES_MODEL",
+    "default_model": "hermes-agent"
+  },
+  "runtime": {
+    "recommended_setup": "blank_slate",
+    "recommended_terminal_backend": "docker",
+    "api_server_enabled": true,
+    "direct_external_credentials": false
+  },
+  "authority": {
+    "allowed_roles": ["specialist", "reviewer"],
+    "requires_orchestration_gate": true,
+    "requires_action_control_for_external_writes": true,
+    "prohibited_direct_actions": [
+      "money_movement",
+      "live_trading",
+      "credential_changes",
+      "destructive_operations",
+      "external_publish",
+      "contract_signature"
+    ]
+  }
+}
