@@ -54,3 +54,4 @@ jobs:
           python -m json.tool config/tool-policy.json > /dev/null
           python -m json.tool config/orchestration-policy.json > /dev/null
           python -m json.tool config/resource-allocation.json > /dev/null
+          python -m json.tool config/hermes-agent.json > /dev/null
