@@ -1,0 +1,28 @@
+name: Validate infrastructure
+
+on:
+  pull_request:
+    paths:
+      - "infrastructure/**"
+      - ".github/workflows/infrastructure.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "infrastructure/**"
+      - ".github/workflows/infrastructure.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_PASSWORD: ci-only-placeholder
+      N8N_ENCRYPTION_KEY: ci-only-placeholder-at-least-32-characters
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-compose-action@v1
+      - name: Validate Docker Compose
+        run: docker compose -f infrastructure/docker-compose.yml config --quiet
