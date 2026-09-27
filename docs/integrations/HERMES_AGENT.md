@@ -20,11 +20,12 @@ Required Hermes settings:
 
 Required JARVIS environment:
 
+- `HERMES_ENABLED=true` only after every activation check passes
 - `HERMES_API_URL=https://<hermes-host>`
 - `HERMES_API_KEY=<same secret>`
 - `HERMES_MODEL=hermes-agent`
 
-The bridge uses Hermes' documented OpenAI-compatible `POST /v1/chat/completions` endpoint.
+The bridge uses Hermes' documented OpenAI-compatible `POST /v1/chat/completions` endpoint. Non-loopback HTTP URLs, embedded URL credentials, invalid timeouts, and disabled runtimes fail closed before a network call.
 
 ## Initial authority
 
@@ -32,16 +33,17 @@ Phase 1 is dry-run and research/code assistance only. Hermes may inspect provide
 
 ## Activation checklist
 
-1. Run `scripts/hermes_bootstrap.sh` on a persistent Linux host/VM.
-2. Complete `hermes setup` using Blank Slate and configure a model with >=64K context.
-3. Enable API server + bearer key.
-4. Start `hermes gateway`.
-5. Set JARVIS `HERMES_API_URL` and `HERMES_API_KEY`.
-6. Run `hermes doctor`.
-7. Smoke-test `/v1/chat/completions`.
-8. Run JARVIS unit tests.
-9. Change `config/hermes-agent.json.enabled` only after the smoke test passes.
-10. Add tools one at a time, preserving least privilege.
+1. Review the current official Hermes installer and calculate its SHA-256.
+2. Run `HERMES_INSTALLER_SHA256=<reviewed-sha256> scripts/hermes_bootstrap.sh` on a persistent Linux host/VM.
+3. Complete `hermes setup` using Blank Slate and configure a model with at least 64K context.
+4. Enable the API server and create a bearer key.
+5. Start `hermes gateway`.
+6. Set JARVIS `HERMES_API_URL`, `HERMES_API_KEY`, and `HERMES_MODEL`.
+7. Run `hermes doctor`.
+8. Smoke-test `/v1/chat/completions`.
+9. Run JARVIS unit tests.
+10. Change `config/hermes-agent.json.enabled` and set `HERMES_ENABLED=true` only after the smoke test passes.
+11. Add tools one at a time, preserving least privilege.
 
 ## Deployment note
 
