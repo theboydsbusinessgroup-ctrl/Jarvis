@@ -32,8 +32,20 @@ class HermesAgentIntegrationTests(unittest.TestCase):
         self.assertIn("Do not move money", prompt)
         self.assertIn('"tier": "GREEN"', prompt)
 
+    def test_disabled_blocks_before_gate_or_network(self):
+        with patch.dict(os.environ, {}, clear=True), patch(
+            "src.integrations.hermes_agent._call_hermes"
+        ) as network:
+            result = delegate_to_hermes(
+                gate=self.gate,
+                task="Inspect a build",
+                context=self.context(),
+            )
+        self.assertEqual(result.status, "disabled")
+        network.assert_not_called()
+
     def test_missing_key_fails_closed_after_gate(self):
-        with patch.dict(os.environ, {}, clear=True):
+        with patch.dict(os.environ, {"HERMES_ENABLED": "true"}, clear=True):
             result = delegate_to_hermes(
                 gate=self.gate,
                 task="Inspect a build",
@@ -44,7 +56,9 @@ class HermesAgentIntegrationTests(unittest.TestCase):
         self.assertEqual(len(result.context_fingerprint), 64)
 
     def test_worker_limit_blocks_before_network_call(self):
-        with patch("src.integrations.hermes_agent._call_hermes") as network:
+        with patch.dict(os.environ, {"HERMES_ENABLED": "true"}, clear=True), patch(
+            "src.integrations.hermes_agent._call_hermes"
+        ) as network:
             result = delegate_to_hermes(
                 gate=self.gate,
                 task="Inspect a build",
@@ -58,7 +72,9 @@ class HermesAgentIntegrationTests(unittest.TestCase):
     def test_missing_authority_context_blocks_before_network_call(self):
         context = self.context()
         del context["authority_context"]
-        with patch("src.integrations.hermes_agent._call_hermes") as network:
+        with patch.dict(os.environ, {"HERMES_ENABLED": "true"}, clear=True), patch(
+            "src.integrations.hermes_agent._call_hermes"
+        ) as network:
             result = delegate_to_hermes(
                 gate=self.gate,
                 task="Inspect a build",
@@ -66,6 +82,24 @@ class HermesAgentIntegrationTests(unittest.TestCase):
             )
         self.assertEqual(result.status, "blocked")
         self.assertIn("authority_context", result.error)
+        network.assert_not_called()
+
+    def test_rejects_non_https_remote_url_before_network_call(self):
+        env = {
+            "HERMES_ENABLED": "true",
+            "HERMES_API_KEY": "test-key",
+            "HERMES_API_URL": "http://example.com:8642",
+        }
+        with patch.dict(os.environ, env, clear=True), patch(
+            "src.integrations.hermes_agent.urlopen"
+        ) as network:
+            result = delegate_to_hermes(
+                gate=self.gate,
+                task="Inspect a build",
+                context=self.context(),
+            )
+        self.assertEqual(result.status, "error")
+        self.assertIn("HTTPS", result.error)
         network.assert_not_called()
 
 
