@@ -4,6 +4,7 @@
   "mode": "dry_run",
   "role": "bounded_worker",
   "api": {
+    "enabled_env": "HERMES_ENABLED",
     "base_url_env": "HERMES_API_URL",
     "key_env": "HERMES_API_KEY",
     "model_env": "HERMES_MODEL",
