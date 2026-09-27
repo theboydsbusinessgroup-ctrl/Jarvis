@@ -3,15 +3,18 @@
 This directory is the common automation substrate for the Boyd portfolio.
 
 ## Phase 1 services
+
 - PostgreSQL: shared operational state
 - n8n: event/workflow orchestration
 - changedetection.io: opportunity and competitor monitoring
 - Metabase: portfolio dashboards
 
 ## Architecture rule
+
 Jarvis is the command/control plane. Revenue repos remain independent domain services. Shared scheduling, browser jobs, scraping jobs, notifications, observability and state should be exposed as reusable services instead of copied into each revenue repo.
 
 ## Next integrations
+
 1. Playwright worker for deterministic browser automation.
 2. Crawlee worker for compliant public-web collection.
 3. Browser Use fallback worker for reasoning-heavy browser tasks.
@@ -20,14 +23,22 @@ Jarvis is the command/control plane. Revenue repos remain independent domain ser
 6. PostHog for funnel/product analytics.
 
 ## Safety / autonomy
-- No secrets in Git.
+
+- No secrets in Git; `infrastructure/.env` is ignored.
+- Required secrets fail closed during Compose configuration.
+- Admin interfaces bind to `127.0.0.1` only.
 - High-impact financial actions remain separately permissioned.
 - Browser workers must respect site authorization, access controls, rate limits and applicable terms.
 - Human approval gates should be configurable per workflow.
+- Public or remote access requires a separately reviewed TLS/authentication layer.
 
 ## Start locally
-Copy `.env.example` to `.env`, replace placeholder secrets, then run:
 
-`docker compose -f infrastructure/docker-compose.yml up -d`
+Copy `.env.example` to `.env`, replace both placeholder secrets, then validate and start:
 
-This commit intentionally does not contain production credentials or automatically expose services to the public internet.
+```sh
+docker compose --env-file infrastructure/.env -f infrastructure/docker-compose.yml config --quiet
+docker compose --env-file infrastructure/.env -f infrastructure/docker-compose.yml up -d
+```
+
+The stack uses versioned application images and does not automatically expose services beyond the local machine.
