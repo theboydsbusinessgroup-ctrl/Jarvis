@@ -5,13 +5,14 @@ import os
 from dataclasses import dataclass
 from typing import Any, Mapping
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from src.core.orchestration_gate import OrchestrationGate
 
-HERMES_URL = os.getenv("HERMES_API_URL", "http://127.0.0.1:8642").rstrip("/")
-HERMES_MODEL = os.getenv("HERMES_MODEL", "hermes-agent")
-HERMES_TIMEOUT = int(os.getenv("HERMES_TIMEOUT_SECONDS", "120"))
+DEFAULT_HERMES_MODEL = "hermes-agent"
+DEFAULT_HERMES_TIMEOUT = 120
+MAX_HERMES_TIMEOUT = 300
 
 
 @dataclass(frozen=True)
@@ -19,7 +20,7 @@ class HermesResult:
     status: str
     response: str | None = None
     error: str | None = None
-    model: str = HERMES_MODEL
+    model: str = DEFAULT_HERMES_MODEL
     usage: dict[str, Any] | None = None
     context_fingerprint: str | None = None
 
@@ -34,7 +35,41 @@ class HermesResult:
         }
 
 
-def _request_json(url: str, *, headers: Mapping[str, str], body: Mapping[str, Any]) -> dict[str, Any]:
+def _is_enabled() -> bool:
+    return os.getenv("HERMES_ENABLED", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _runtime_settings() -> tuple[str, str, int]:
+    raw_url = os.getenv("HERMES_API_URL", "http://127.0.0.1:8642").strip().rstrip("/")
+    parts = urlsplit(raw_url)
+    if parts.scheme not in {"http", "https"} or not parts.hostname:
+        raise ValueError("HERMES_API_URL must be an absolute HTTP(S) URL")
+    if parts.username or parts.password or parts.query or parts.fragment:
+        raise ValueError("HERMES_API_URL must not include credentials, a query, or a fragment")
+    if parts.scheme != "https" and parts.hostname not in {"127.0.0.1", "localhost", "::1"}:
+        raise ValueError("HERMES_API_URL must use HTTPS unless it targets loopback")
+
+    model = os.getenv("HERMES_MODEL", DEFAULT_HERMES_MODEL).strip()
+    if not model:
+        raise ValueError("HERMES_MODEL must not be empty")
+
+    try:
+        timeout = int(os.getenv("HERMES_TIMEOUT_SECONDS", str(DEFAULT_HERMES_TIMEOUT)))
+    except ValueError as exc:
+        raise ValueError("HERMES_TIMEOUT_SECONDS must be an integer") from exc
+    if timeout < 1 or timeout > MAX_HERMES_TIMEOUT:
+        raise ValueError(f"HERMES_TIMEOUT_SECONDS must be between 1 and {MAX_HERMES_TIMEOUT}")
+
+    return raw_url, model, timeout
+
+
+def _request_json(
+    url: str,
+    *,
+    headers: Mapping[str, str],
+    body: Mapping[str, Any],
+    timeout: int,
+) -> dict[str, Any]:
     req = Request(
         url,
         data=json.dumps(dict(body)).encode("utf-8"),
@@ -42,7 +77,7 @@ def _request_json(url: str, *, headers: Mapping[str, str], body: Mapping[str, An
         method="POST",
     )
     try:
-        with urlopen(req, timeout=HERMES_TIMEOUT) as response:
+        with urlopen(req, timeout=timeout) as response:
             return json.loads(response.read().decode("utf-8"))
     except HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
@@ -80,6 +115,13 @@ def build_worker_prompt(*, task: str, context: Mapping[str, Any], role: str) -> 
 
 def _call_hermes(*, task: str, context: Mapping[str, Any], role: str) -> HermesResult:
     """Low-level network call. Callers should use delegate_to_hermes()."""
+    if not _is_enabled():
+        return HermesResult(
+            status="disabled",
+            error="Hermes is disabled; set HERMES_ENABLED=true only after the activation checklist passes",
+            context_fingerprint=context.get("jarvis_context_fingerprint"),
+        )
+
     key = os.getenv("HERMES_API_KEY")
     if not key:
         return HermesResult(
@@ -88,27 +130,29 @@ def _call_hermes(*, task: str, context: Mapping[str, Any], role: str) -> HermesR
             context_fingerprint=context.get("jarvis_context_fingerprint"),
         )
 
-    prompt = build_worker_prompt(task=task, context=context, role=role)
-    body = {
-        "model": HERMES_MODEL,
-        "stream": False,
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are an execution worker subordinate to JARVIS authority and approval controls.",
-            },
-            {"role": "user", "content": prompt},
-        ],
-    }
     try:
+        base_url, model, timeout = _runtime_settings()
+        prompt = build_worker_prompt(task=task, context=context, role=role)
+        body = {
+            "model": model,
+            "stream": False,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are an execution worker subordinate to JARVIS authority and approval controls.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+        }
         data = _request_json(
-            f"{HERMES_URL}/v1/chat/completions",
+            f"{base_url}/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {key}",
                 "Content-Type": "application/json",
                 "User-Agent": "jarvis-hermes-bridge",
             },
             body=body,
+            timeout=timeout,
         )
         choices = data.get("choices") or []
         message = (choices[0].get("message") or {}) if choices else {}
@@ -118,7 +162,7 @@ def _call_hermes(*, task: str, context: Mapping[str, Any], role: str) -> HermesR
         return HermesResult(
             status="ok",
             response=response,
-            model=str(data.get("model") or HERMES_MODEL),
+            model=str(data.get("model") or model),
             usage=data.get("usage"),
             context_fingerprint=context.get("jarvis_context_fingerprint"),
         )
@@ -140,6 +184,12 @@ def delegate_to_hermes(
     active_workers: int = 0,
 ) -> HermesResult:
     """Authorize a Hermes delegation through JARVIS before any network call."""
+    if not _is_enabled():
+        return HermesResult(
+            status="disabled",
+            error="Hermes is disabled; set HERMES_ENABLED=true only after the activation checklist passes",
+        )
+
     decision = gate.evaluate(
         current_depth=current_depth,
         active_workers=active_workers,
