@@ -1,23 +1,28 @@
 from __future__ import annotations
 
+import hmac
+import os
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 from fastapi.responses import HTMLResponse
 
 from src.core.health_aggregator import aggregate, load_registry
+from src.core.orchestration_gate import OrchestrationGate
 from src.core.policy_engine import PolicyEngine
 from src.core.resource_allocator import ResourceAllocator
 from src.core.revenue_ledger import RevenueLedger
 from src.core.command_router import route_command
+from src.integrations.hermes_agent import delegate_to_hermes
 from src.integrations.revenue_recovery import load_recovery_snapshot
 from src.integrations.second_brain import call_second_brain
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "contracts" / "portfolio-registry.json"
 POLICY_PATH = ROOT / "config" / "autonomy-policy.json"
+ORCHESTRATION_PATH = ROOT / "config" / "orchestration-policy.json"
 ALLOCATION_PATH = ROOT / "config" / "resource-allocation.json"
 DASHBOARD_PATH = ROOT / "web" / "dashboard.html"
 RECOVERY_PATH = ROOT / "data" / "revenue-recovery.json"
@@ -123,6 +128,40 @@ def second_brain(request: SecondBrainRequest) -> dict[str, Any]:
     result = call_second_brain(task=request.task, decision_criteria=request.decision_criteria, evidence=request.evidence, review_mode=request.review_mode)
     if result.status == "not_configured":
         raise HTTPException(status_code=503, detail=result.error)
+    if result.status == "error":
+        raise HTTPException(status_code=502, detail=result.error)
+    return result.to_dict()
+
+
+def _require_hermes_probe_auth(authorization: str | None) -> None:
+    key = os.getenv("HERMES_API_KEY", "").strip()
+    if not key:
+        raise HTTPException(status_code=503, detail="HERMES_API_KEY is not configured")
+    expected = f"Bearer {key}"
+    if not authorization or not hmac.compare_digest(authorization, expected):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+
+@app.post("/api/hermes/probe")
+def hermes_probe(authorization: str | None = Header(default=None)) -> dict[str, Any]:
+    """Authenticated fixed-purpose probe for the JARVIS -> Hermes production path."""
+    _require_hermes_probe_auth(authorization)
+    gate = OrchestrationGate.from_file(ORCHESTRATION_PATH)
+    task = "Reply with exactly: JARVIS_HERMES_E2E_OK"
+    context = {
+        "task_id": "jarvis-hermes-e2e-probe",
+        "trace_id": "jarvis-hermes-e2e-probe",
+        "project_id": "jarvis",
+        "objective": task,
+        "constraints": ["dry-run only", "no external writes", "return only the requested probe string"],
+        "authority_context": {"tier": "GREEN", "mode": "dry_run"},
+        "evidence_refs": ["runtime:jarvis-hermes-production-probe"],
+    }
+    result = delegate_to_hermes(gate=gate, task=task, context=context, role="specialist")
+    if result.status in {"disabled", "not_configured"}:
+        raise HTTPException(status_code=503, detail=result.error)
+    if result.status == "blocked":
+        raise HTTPException(status_code=403, detail=result.error)
     if result.status == "error":
         raise HTTPException(status_code=502, detail=result.error)
     return result.to_dict()
