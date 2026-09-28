@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "enabled": false,
+  "enabled": true,
   "mode": "dry_run",
   "role": "bounded_worker",
   "api": {
