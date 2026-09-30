@@ -1,2 +1,4 @@
 .env
 infrastructure/.env
+__pycache__/
+*.py[cod]

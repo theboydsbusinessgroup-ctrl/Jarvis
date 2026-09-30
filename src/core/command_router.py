@@ -35,6 +35,9 @@ def route_command(transcript: str, state: dict[str, Any]) -> CommandDecision:
     if not raw:
         return CommandDecision(raw, "empty", "rejected", "I didn't catch that. Try again.")
 
+    if text in {"go to sleep", "sleep"}:
+        return CommandDecision(raw, "sleep", "execute", "Standing by, Eric.", "sleep")
+
     if any(term in text for term in HIGH_IMPACT_TERMS):
         return CommandDecision(
             raw, "high_impact_action", "require_approval",

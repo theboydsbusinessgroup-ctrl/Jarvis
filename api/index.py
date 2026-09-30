@@ -5,9 +5,10 @@ import os
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request, Response
+from threading import BoundedSemaphore
 from pydantic import BaseModel, Field
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 
 from src.core.health_aggregator import aggregate, load_registry
 from src.core.orchestration_gate import OrchestrationGate
@@ -18,6 +19,8 @@ from src.core.command_router import route_command
 from src.integrations.hermes_agent import delegate_to_hermes
 from src.integrations.revenue_recovery import load_recovery_snapshot
 from src.integrations.second_brain import call_second_brain
+from src.core.conversation import converse, proxy_conversation
+from src.core.owner_session import COOKIE, SESSION_SECONDS, authenticated, issue_session, owner_key, rate_limit, require_owner, require_same_origin
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "contracts" / "portfolio-registry.json"
@@ -28,6 +31,7 @@ DASHBOARD_PATH = ROOT / "web" / "dashboard.html"
 RECOVERY_PATH = ROOT / "data" / "revenue-recovery.json"
 
 app = FastAPI(title="JARVIS Control Plane", version="0.3.0")
+CONVERSATION_SLOTS = BoundedSemaphore(2)
 
 
 def build_state() -> dict[str, Any]:
@@ -107,7 +111,69 @@ def policy(project_id: str, action: str, authority_tier: str = "UNKNOWN") -> dic
 
 
 class VoiceCommandRequest(BaseModel):
-    transcript: str
+    transcript: str = Field(min_length=1, max_length=4000)
+
+
+class ConversationTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(max_length=2000)
+
+
+class ConversationRequest(VoiceCommandRequest):
+    history: list[ConversationTurn] = Field(default_factory=list, max_length=12)
+
+
+class LoginRequest(BaseModel):
+    key: str = Field(min_length=1, max_length=256)
+
+
+@app.get("/api/voice/config")
+def voice_config(request: Request):
+    enabled = os.getenv("HERMES_ENABLED", "").lower() in {"true", "1", "yes", "on"}
+    return {"version": "voice-1", "authenticated": authenticated(request),
+            "owner_login_configured": bool(owner_key()),
+            "hermes_configured": bool(os.getenv("JARVIS_CONVERSATION_PROXY_URL")) or (enabled and bool(os.getenv("HERMES_API_URL")) and bool(os.getenv("HERMES_API_KEY"))),
+            "device_actions_connected": False}
+
+
+@app.post("/api/owner/login")
+def owner_login(body: LoginRequest, request: Request, response: Response):
+    require_same_origin(request)
+    rate_limit("login", limit=10)
+    key = owner_key()
+    if not key:
+        raise HTTPException(503, "Owner sign-in is not configured")
+    if not hmac.compare_digest(body.key.encode(), key.encode()):
+        raise HTTPException(401, "Incorrect owner access code")
+    response.set_cookie(COOKIE, issue_session(), max_age=SESSION_SECONDS,
+                        secure=True, httponly=True, samesite="strict", path="/")
+    response.headers["Cache-Control"] = "no-store"
+    return {"authenticated": True}
+
+
+@app.post("/api/owner/logout")
+def owner_logout(request: Request, response: Response):
+    require_same_origin(request)
+    response.delete_cookie(COOKIE, path="/")
+    return {"authenticated": False}
+
+
+@app.post("/api/conversation")
+def conversation(body: ConversationRequest, request: Request):
+    require_owner(request)
+    rate_limit("conversation")
+    if not CONVERSATION_SLOTS.acquire(blocking=False):
+        raise HTTPException(429, "Jarvis is handling another request. Please retry shortly.")
+    try:
+        if os.getenv("JARVIS_CONVERSATION_PROXY_URL"):
+            try:
+                return proxy_conversation(body.transcript, [t.model_dump() for t in body.history])
+            except Exception:
+                raise HTTPException(502, "The Hermes conversation channel is unavailable. Please retry shortly.") from None
+        return converse(body.transcript, build_state(), [t.model_dump() for t in body.history],
+                        OrchestrationGate.from_file(ORCHESTRATION_PATH))
+    finally:
+        CONVERSATION_SLOTS.release()
 
 
 @app.post("/api/command")
@@ -194,3 +260,9 @@ def privacy_policy() -> str:
 @app.get("/", response_class=HTMLResponse)
 def dashboard() -> str:
     return DASHBOARD_PATH.read_text(encoding="utf-8")
+
+
+@app.get("/voice.js")
+def voice_script():
+    return FileResponse(ROOT / "web" / "voice.js", media_type="application/javascript",
+                        headers={"Cache-Control": "no-cache"})
