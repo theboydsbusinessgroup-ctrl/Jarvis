@@ -1,25 +1,68 @@
 {
   "schema_version": "1.0",
   "baseline_percent": {
-    "shared_infrastructure_jarvis": 35,
-    "media_engine": 25,
-    "revenue_recovery": 20,
-    "eventmatch": 10,
-    "rotating_cleanup": 10
+    "shared_infrastructure_jarvis": 15,
+    "media_engine": 35,
+    "productized_ai_service": 30,
+    "revenue_recovery": 5,
+    "eventmatch": 5,
+    "provider_readiness": 5,
+    "validated_experiments": 5
   },
   "bounds_percent": {
-    "shared_infrastructure_jarvis": {"min": 20, "max": 45},
-    "media_engine": {"min": 10, "max": 35},
-    "revenue_recovery": {"min": 10, "max": 30},
-    "eventmatch": {"min": 5, "max": 20},
-    "rotating_cleanup": {"min": 5, "max": 20}
+    "shared_infrastructure_jarvis": {
+      "min": 5,
+      "max": 25
+    },
+    "media_engine": {
+      "min": 20,
+      "max": 45
+    },
+    "productized_ai_service": {
+      "min": 20,
+      "max": 40
+    },
+    "revenue_recovery": {
+      "min": 1,
+      "max": 15
+    },
+    "eventmatch": {
+      "min": 1,
+      "max": 15
+    },
+    "provider_readiness": {
+      "min": 1,
+      "max": 15
+    },
+    "validated_experiments": {
+      "min": 1,
+      "max": 15
+    }
   },
   "bucket_projects": {
-    "shared_infrastructure_jarvis": ["jarvis", "etsy_connector"],
-    "media_engine": ["autonomous_media_engine"],
-    "revenue_recovery": ["revenue_recovery"],
-    "eventmatch": ["eventmatch"],
-    "rotating_cleanup": ["boyds_bar_os", "wholesale_deal_engine", "wealth_protection", "autonomous_trading", "digital_asset_licensing", "productized_ai_service", "service_arbitrage"]
+    "shared_infrastructure_jarvis": [
+      "jarvis"
+    ],
+    "media_engine": [
+      "autonomous_media_engine"
+    ],
+    "productized_ai_service": [
+      "productized_ai_service"
+    ],
+    "revenue_recovery": [
+      "revenue_recovery"
+    ],
+    "eventmatch": [
+      "eventmatch"
+    ],
+    "provider_readiness": [
+      "service_arbitrage",
+      "etsy_connector"
+    ],
+    "validated_experiments": [
+      "boyds_bar_os",
+      "wholesale_deal_engine"
+    ]
   },
   "weights": {
     "verified_revenue": 3.0,
@@ -41,7 +84,7 @@
     "Verified revenue, conversion, CI/deployment failures, and explicit blockers outrank speculative opportunity.",
     "A single noisy metric cannot move a bucket by more than max_shift_per_cycle.",
     "Critical-risk systems may gain engineering capacity for safety/validation but never authority to execute high-risk actions.",
-    "Live revenue incidents can temporarily override baseline allocation; passive waiting cannot."
+    "Live revenue incidents can temporarily override baseline allocation; passive waiting cannot.",
+    "October 3 implementation prioritizes deployed offer/distribution readiness. Baseline percentages allocate engineering effort, not spending or financial authority. Digital Asset Licensing remains outside Jarvis integration."
   ]
 }
-
