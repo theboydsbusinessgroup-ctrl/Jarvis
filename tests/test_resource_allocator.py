@@ -23,14 +23,14 @@ class ResourceAllocatorTests(unittest.TestCase):
         e = {"media_engine": {"verified_revenue_events": 3, "conversion_events": 4, "automation_leverage": 1}}
         result = self.a.allocate(e)
         self.assertTrue(result["changed"])
-        self.assertGreater(result["allocation"]["media_engine"], 25)
-        self.assertLessEqual(result["allocation"]["media_engine"], 33)
+        self.assertGreater(result["allocation"]["media_engine"], self.a.config["baseline_percent"]["media_engine"])
+        self.assertLessEqual(result["allocation"]["media_engine"], self.a.config["baseline_percent"]["media_engine"] + self.a.config["max_shift_per_cycle"])
         self.assertAlmostEqual(sum(result["allocation"].values()), 100, places=1)
 
     def test_production_failure_redirects_capacity(self):
         e = {"shared_infrastructure_jarvis": {"production_failure": True}}
         result = self.a.allocate(e)
-        self.assertGreater(result["allocation"]["shared_infrastructure_jarvis"], 35)
+        self.assertGreater(result["allocation"]["shared_infrastructure_jarvis"], self.a.config["baseline_percent"]["shared_infrastructure_jarvis"])
 
     def test_single_conversion_does_not_trigger_rebalance(self):
         e = {"eventmatch": {"conversion_events": 1}}
@@ -48,3 +48,4 @@ class ResourceAllocatorTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
