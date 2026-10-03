@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hmac
+from html import escape
 import os
 from pathlib import Path
 from typing import Any, Literal
@@ -46,7 +47,8 @@ def build_state() -> dict[str, Any]:
         "schema_version": "1.2",
         "portfolio": health,
         "allocation": allocator.config["baseline_percent"],
-        "verified_revenue": ledger.summary(),
+        "verified_revenue": {**ledger.summary(), "status": "not_connected", "observed_at": None,
+                             "note": "No durable authoritative revenue feed is connected to this endpoint. Empty ledger totals do not establish portfolio revenue."},
         "revenue_recovery": recovery,
         "guardrails": {
             "revenue_truth": "verified_only",
@@ -190,7 +192,9 @@ class SecondBrainRequest(BaseModel):
 
 
 @app.post("/api/second-brain")
-def second_brain(request: SecondBrainRequest) -> dict[str, Any]:
+def second_brain(request: SecondBrainRequest, http_request: Request) -> dict[str, Any]:
+    require_owner(http_request)
+    rate_limit("second-brain", limit=5)
     result = call_second_brain(task=request.task, decision_criteria=request.decision_criteria, evidence=request.evidence, review_mode=request.review_mode)
     if result.status == "not_configured":
         raise HTTPException(status_code=503, detail=result.error)
@@ -236,7 +240,7 @@ def hermes_probe(authorization: str | None = Header(default=None)) -> dict[str, 
 @app.get("/api/etsy/callback", response_class=HTMLResponse)
 def etsy_callback(code: str | None = None, state: str | None = None, error: str | None = None) -> str:
     if error:
-        return f"<h1>Etsy authorization failed</h1><p>{error}</p>"
+        return f"<h1>Etsy authorization failed</h1><p>{escape(error)}</p>"
     if not code:
         return "<h1>Etsy OAuth callback is ready</h1><p>This endpoint is configured for Etsy authorization.</p>"
     return "<h1>Etsy authorization received</h1><p>The authorization callback reached JARVIS successfully. Return to ChatGPT to finish the connection.</p>"
