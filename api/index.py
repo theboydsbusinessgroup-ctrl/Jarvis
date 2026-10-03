@@ -20,6 +20,7 @@ from src.core.command_router import route_command
 from src.integrations.hermes_agent import delegate_to_hermes
 from src.integrations.revenue_recovery import load_recovery_snapshot
 from src.integrations.second_brain import call_second_brain
+from src.integrations.revenue_feed import load_revenue_feed
 from src.core.conversation import converse, proxy_conversation
 from src.core.owner_session import COOKIE, SESSION_SECONDS, authenticated, issue_session, owner_key, rate_limit, require_owner, require_same_origin
 
@@ -91,8 +92,10 @@ def project(project_id: str) -> dict[str, Any]:
 
 
 @app.get("/api/revenue")
-def revenue() -> dict[str, Any]:
-    return build_state()["verified_revenue"]
+def revenue(request: Request, response: Response) -> dict[str, Any]:
+    require_owner(request)
+    response.headers['Cache-Control']='no-store'
+    return load_revenue_feed()
 
 
 @app.get("/api/recovery")
