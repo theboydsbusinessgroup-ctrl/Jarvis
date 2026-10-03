@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "generated_at": "2026-09-10T18:53:00Z",
+  "generated_at": "2026-10-03T06:08:00Z",
   "authority": "Domain systems remain authoritative. Registry state is an evidence-backed operating view and must never manufacture revenue, deployment, approval, or customer activity.",
   "allocation": {
     "shared_infrastructure_jarvis": 35,
@@ -58,9 +58,17 @@
         "gmail",
         "jarvis"
       ],
-      "blockers": [],
-      "next_action": "Continue measured acquisition and optimize from tracked funnel behavior.",
-      "needs_user": false
+      "blockers": [
+        "Captured live payment has not been verified by this readiness audit.",
+        "Generator uses fixed templates; custom instructions are not applied."
+      ],
+      "next_action": "Improve truthful personalization, validate live payment configuration and measure qualified visitor-to-captured-payment conversion.",
+      "needs_user": false,
+      "observed_at": "2026-10-03T06:08:00Z",
+      "evidence": [
+        "https://productized-ai-service.vercel.app/health",
+        "read-only:aggregate-order-state-audit:2026-10-03"
+      ]
     },
     {
       "id": "service_arbitrage",
@@ -120,8 +128,8 @@
       "repository": "theboydsbusinessgroup-ctrl/Jarvis",
       "display_name": "Jarvis Command Center",
       "category": "portfolio_infrastructure",
-      "lifecycle": "building",
-      "deployment": "build_ready",
+      "lifecycle": "live",
+      "deployment": "production_live",
       "revenue": "pre_revenue",
       "ci": "passing",
       "risk_class": "medium",
@@ -138,10 +146,15 @@
         "gumroad"
       ],
       "blockers": [
-        "Vercel cannot yet link the Jarvis GitHub repository because the Vercel GitHub integration is not authorized for the repository."
+        "Runtime portfolio health reads a static registry; no durable authoritative revenue feed is connected."
       ],
-      "next_action": "Deploy the existing mobile-first control plane once Vercel GitHub repository authorization is available; keep telemetry and registry truth current.",
-      "needs_user": false
+      "next_action": "Run scheduled health checks and reconcile domain revenue; treat unconnected totals as unknown.",
+      "needs_user": false,
+      "observed_at": "2026-10-03T06:08:00Z",
+      "evidence": [
+        "https://jarvis-lyart-sigma.vercel.app/health",
+        "https://vercel.com/eric-boyd/jarvis/BgVZsv4UUbvUzYFg1XtDwLDBvua7"
+      ]
     },
     {
       "id": "autonomous_media_engine",
@@ -164,10 +177,14 @@
         "pinterest"
       ],
       "blockers": [
-        "Pinterest production Pin creation is blocked by API access level; the engine has discovery, generation, QA, and a gated Pinterest transport but no verified live end-to-end publish loop."
+        "Pinterest production publishing remains unverified; YouTube publishing jobs pass but channel conversion and revenue have not been verified."
       ],
-      "next_action": "Complete one verified end-to-end publishing loop when Pinterest production API access is available; continue no-spend content generation and QA in parallel.",
-      "needs_user": false
+      "next_action": "Verify YouTube video receipts, watch-time and attributed conversions; preserve Pinterest access gates.",
+      "needs_user": false,
+      "observed_at": "2026-10-03T06:08:00Z",
+      "evidence": [
+        "https://github.com/theboydsbusinessgroup-ctrl/Media-Engine/actions/runs/37021079699"
+      ]
     },
     {
       "id": "revenue_recovery",

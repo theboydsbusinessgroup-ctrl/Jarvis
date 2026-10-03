@@ -19,7 +19,7 @@
     "media_engine": ["autonomous_media_engine"],
     "revenue_recovery": ["revenue_recovery"],
     "eventmatch": ["eventmatch"],
-    "rotating_cleanup": ["boyds_bar_os", "wholesale_deal_engine", "wealth_protection", "autonomous_trading", "digital_asset_licensing"]
+    "rotating_cleanup": ["boyds_bar_os", "wholesale_deal_engine", "wealth_protection", "autonomous_trading", "digital_asset_licensing", "productized_ai_service", "service_arbitrage"]
   },
   "weights": {
     "verified_revenue": 3.0,
@@ -44,3 +44,4 @@
     "Live revenue incidents can temporarily override baseline allocation; passive waiting cannot."
   ]
 }
+

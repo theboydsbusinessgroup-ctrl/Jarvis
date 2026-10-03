@@ -1,0 +1,8 @@
+{
+  "targets": [
+    {"id": "productized_ai_service", "url": "https://productized-ai-service.vercel.app/health", "required": {"status": "ok", "payment_gate": true, "database_reachable": true}},
+    {"id": "jarvis", "url": "https://jarvis-lyart-sigma.vercel.app/health", "required": {"status": "ok"}, "advisory": {"recovery_signal_status": "ok"}},
+    {"id": "service_arbitrage", "url": "https://service-arbitrage-zeta.vercel.app/payment/readiness", "required": {}, "advisory": {"payment_ready": true}},
+    {"id": "etsy_connector", "url": "https://etsy-connector.vercel.app/health", "required": {"status": "ok"}, "advisory": {"configured": true}}
+  ]
+}
