@@ -1,15 +1,18 @@
 import json
 import unittest
 from unittest.mock import patch
-from fastapi.testclient import TestClient
-from api.index import app
+from fastapi import HTTPException, Request, Response
+from api.index import revenue
 from src.integrations.revenue_feed import load_revenue_feed
 
 
 class RevenueFeedTests(unittest.TestCase):
     def test_anonymous_cannot_read_financial_feed(self):
         with patch('api.index.load_revenue_feed') as fetch:
-            self.assertEqual(TestClient(app).get('/api/revenue').status_code,401)
+            request=Request({'type':'http','method':'GET','path':'/api/revenue','headers':[]})
+            with self.assertRaises(HTTPException) as denied:
+                revenue(request,Response())
+            self.assertEqual(denied.exception.status_code,401)
             fetch.assert_not_called()
 
     def test_missing_token_reports_unknown(self):
