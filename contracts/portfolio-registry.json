@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "generated_at": "2026-10-03T06:08:00Z",
+  "generated_at": "2026-10-12T06:16:00Z",
   "authority": "Domain systems remain authoritative. Registry state is an evidence-backed operating view and must never manufacture revenue, deployment, approval, or customer activity.",
   "allocation": {
     "shared_infrastructure_jarvis": 35,
@@ -31,9 +31,16 @@
         "etsy",
         "pinterest"
       ],
-      "blockers": [],
-      "next_action": "Collect marketplace traffic and conversion evidence; act on material signal.",
-      "needs_user": false
+      "blockers": [
+        "Gumroad confirms the Wedding product is published but reports no delivery file metadata. Buyer delivery remains unverified."
+      ],
+      "next_action": "Attach the prepared Wedding buyer package and test its buyer download. Other inspected Gumroad products have delivery file metadata.",
+      "needs_user": true,
+      "observed_at": "2026-10-12T06:16:00Z",
+      "evidence": [
+        "https://boydsbusiness.gumroad.com/l/mgybdb",
+        "authenticated:Gumroad-catalog-audit:2026-10-12"
+      ]
     },
     {
       "id": "productized_ai_service",
@@ -59,15 +66,15 @@
         "jarvis"
       ],
       "blockers": [
-        "Captured live payment has not been verified by this readiness audit.",
-        "Generator uses fixed templates; custom instructions are not applied."
+        "No captured live payment is recorded in the service receipt table as of the October 12 audit; live payment-to-delivery remains unverified.",
+        "Free-form instructions require customer review; supported no-hashtag/no-discount constraints and service rotation are implemented."
       ],
-      "next_action": "Improve truthful personalization, validate live payment configuration and measure qualified visitor-to-captured-payment conversion.",
+      "next_action": "Verify live webhook receipt through delivery after connecting the correct payment account, then measure qualified traffic and conversion.",
       "needs_user": false,
-      "observed_at": "2026-10-03T06:08:00Z",
+      "observed_at": "2026-10-12T06:13:02Z",
       "evidence": [
         "https://productized-ai-service.vercel.app/health",
-        "read-only:aggregate-order-state-audit:2026-10-03"
+        "read-only:Supabase-aggregate-receipt-audit:2026-10-12"
       ]
     },
     {
@@ -146,14 +153,14 @@
         "gumroad"
       ],
       "blockers": [
-        "Runtime portfolio health reads a static registry; no durable authoritative revenue feed is connected."
+        "Recovery snapshot remains dated September 10 and is stale; authoritative ingestion must be reconnected.",
+        "Hermes configuration exists, but authenticated worker execution was not verified during this repair audit."
       ],
-      "next_action": "Run scheduled health checks and reconcile domain revenue; treat unconnected totals as unknown.",
+      "next_action": "Use live readiness checks; refresh authoritative recovery ingestion and run the owner-authenticated Hermes probe.",
       "needs_user": false,
-      "observed_at": "2026-10-03T06:08:00Z",
+      "observed_at": "2026-10-12T06:14:50Z",
       "evidence": [
-        "https://jarvis-lyart-sigma.vercel.app/health",
-        "https://vercel.com/eric-boyd/jarvis/BgVZsv4UUbvUzYFg1XtDwLDBvua7"
+        "https://jarvis-lyart-sigma.vercel.app/health"
       ]
     },
     {
@@ -177,13 +184,14 @@
         "pinterest"
       ],
       "blockers": [
-        "Pinterest production publishing remains unverified; YouTube publishing jobs pass but channel conversion and revenue have not been verified."
+        "YouTube rendering works, but Google rejects the refresh token as expired or revoked (invalid_grant).",
+        "Pinterest production publishing remains unverified."
       ],
-      "next_action": "Verify YouTube video receipts, watch-time and attributed conversions; preserve Pinterest access gates.",
-      "needs_user": false,
-      "observed_at": "2026-10-03T06:08:00Z",
+      "next_action": "Reauthorize the existing YouTube OAuth client, replace the repository refresh token and run the refresh-only authorization check before publishing.",
+      "needs_user": true,
+      "observed_at": "2026-10-12T06:14:50Z",
       "evidence": [
-        "https://github.com/theboydsbusinessgroup-ctrl/Media-Engine/actions/runs/37021079699"
+        "https://github.com/theboydsbusinessgroup-ctrl/Media-Engine/actions/runs/38166074011"
       ]
     },
     {
@@ -285,10 +293,15 @@
         "jarvis"
       ],
       "blockers": [
-        "No verified production sourcing/contract workflow."
+        "Local research MVP and HCAD enrichment exist; repeatable discovery, verified sold comps, repair/title review and qualified buyer evidence remain incomplete.",
+        "No hosted scheduler or live Jarvis telemetry is installed."
       ],
-      "next_action": "Harden sourcing, underwriting, compliance gates, and paper-trading style deal simulation before external commitments.",
-      "needs_user": false
+      "next_action": "Screen a seller-direct candidate using verified closed sales, repair evidence and a funded buyer. Keep local execution independent of Jarvis.",
+      "needs_user": false,
+      "observed_at": "2026-10-12T06:14:00Z",
+      "evidence": [
+        "https://github.com/theboydsbusinessgroup-ctrl/Wholesale-Deal-Engine/blob/main/docs/MVP.md"
+      ]
     },
     {
       "id": "wealth_protection",
