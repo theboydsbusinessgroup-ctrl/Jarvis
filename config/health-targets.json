@@ -3,6 +3,7 @@
     {"id": "productized_ai_service", "url": "https://productized-ai-service.vercel.app/health", "required": {"status": "ok", "payment_gate": true, "database_reachable": true}},
     {"id": "jarvis", "url": "https://jarvis-lyart-sigma.vercel.app/health", "required": {"status": "ok"}, "advisory": {"recovery_signal_status": "ok"}},
     {"id": "service_arbitrage", "url": "https://service-arbitrage-zeta.vercel.app/payment/readiness", "required": {}, "advisory": {"payment_ready": true}},
-    {"id": "etsy_connector", "url": "https://etsy-connector.vercel.app/health", "required": {"status": "ok"}, "advisory": {"configured": true}}
+    {"id": "etsy_connector", "url": "https://etsy-connector.vercel.app/health", "required": {"status": "ok"}, "advisory": {"configured": true}},
+    {"id": "autonomous_media_engine", "kind": "github_workflow", "url": "https://api.github.com/repos/theboydsbusinessgroup-ctrl/Media-Engine/actions/workflows/youtube-autonomous-short-smoke.yml/runs?branch=main&per_page=1", "stale_after_hours": 48}
   ]
 }

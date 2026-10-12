@@ -8,6 +8,7 @@ from typing import Any, Literal
 
 from fastapi import FastAPI, Header, HTTPException, Request, Response
 from threading import BoundedSemaphore
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 from fastapi.responses import HTMLResponse, FileResponse
 
@@ -21,6 +22,7 @@ from src.integrations.hermes_agent import delegate_to_hermes
 from src.integrations.revenue_recovery import load_recovery_snapshot
 from src.integrations.second_brain import call_second_brain
 from src.integrations.revenue_feed import load_revenue_feed
+from src.integrations.portfolio_readiness import load_live_readiness
 from src.core.conversation import converse, proxy_conversation
 from src.core.owner_session import COOKIE, SESSION_SECONDS, authenticated, issue_session, owner_key, rate_limit, require_owner, require_same_origin
 
@@ -75,6 +77,13 @@ def health() -> dict[str, Any]:
 @app.get("/api/control-plane")
 def control_plane() -> dict[str, Any]:
     return build_state()
+
+
+@app.get("/api/readiness")
+def live_readiness(response: Response) -> dict[str, Any]:
+    """Fresh public service/publishing evidence, distinct from dated registry state."""
+    response.headers["Cache-Control"] = "no-store"
+    return load_live_readiness()
 
 
 @app.get("/api/projects")
@@ -219,6 +228,18 @@ def _require_hermes_probe_auth(authorization: str | None) -> None:
 def hermes_probe(authorization: str | None = Header(default=None)) -> dict[str, Any]:
     """Authenticated fixed-purpose probe for the JARVIS -> Hermes production path."""
     _require_hermes_probe_auth(authorization)
+    return _run_hermes_probe()
+
+
+@app.post("/api/owner/hermes/probe")
+def owner_hermes_probe(request: Request) -> dict[str, Any]:
+    """Let the signed-in owner test the worker without exposing its service key."""
+    require_owner(request)
+    rate_limit("hermes-probe", limit=3)
+    return _run_hermes_probe()
+
+
+def _run_hermes_probe() -> dict[str, Any]:
     gate = OrchestrationGate.from_file(ORCHESTRATION_PATH)
     task = "Reply with exactly: JARVIS_HERMES_E2E_OK"
     context = {
@@ -236,8 +257,11 @@ def hermes_probe(authorization: str | None = Header(default=None)) -> dict[str, 
     if result.status == "blocked":
         raise HTTPException(status_code=403, detail=result.error)
     if result.status == "error":
-        raise HTTPException(status_code=502, detail=result.error)
-    return result.to_dict()
+        raise HTTPException(status_code=502, detail="Hermes worker is unavailable; retry shortly")
+    if (result.response or "").strip() != "JARVIS_HERMES_E2E_OK":
+        raise HTTPException(status_code=502, detail="Hermes responded, but the fixed-purpose probe was not verified")
+    return {"status": "ok", "worker_verified": True,
+            "observed_at": datetime.now(timezone.utc).isoformat(), "external_writes": False}
 
 
 @app.get("/api/etsy/callback", response_class=HTMLResponse)
@@ -272,4 +296,10 @@ def dashboard() -> str:
 @app.get("/voice.js")
 def voice_script():
     return FileResponse(ROOT / "web" / "voice.js", media_type="application/javascript",
+                        headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/readiness.js")
+def readiness_script():
+    return FileResponse(ROOT / "web" / "readiness.js", media_type="application/javascript",
                         headers={"Cache-Control": "no-cache"})

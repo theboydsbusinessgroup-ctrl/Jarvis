@@ -21,6 +21,9 @@ class RegistryTests(unittest.TestCase):
 
     def test_user_actions_sort_first(self):
         registry = load_registry(ROOT / "contracts" / "portfolio-registry.json")
+        # Isolate the prioritization rule from current live account blockers.
+        for project in registry["registry"]:
+            project["needs_user"] = False
         snapshot = {"project_id": "eventmatch", "needs_user": True, "next_action": "Provide required credential.", "blockers": ["Credential required."]}
         report = aggregate(registry, [snapshot])
         self.assertEqual(report["action_queue"][0]["project_id"], "eventmatch")

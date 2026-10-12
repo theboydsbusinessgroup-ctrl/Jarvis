@@ -26,7 +26,25 @@ jobs:
       - name: Test monitor behavior
         run: python -m unittest discover -s tests -p test_portfolio_readiness.py -v
       - name: Check public readiness
+        id: readiness
         run: python scripts/check_portfolio_health.py --output /tmp/portfolio-health.json
+      - name: Write actionable readiness summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          path = Path('/tmp/portfolio-health.json')
+          if path.exists():
+              report = json.loads(path.read_text())
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                  summary.write('## Live readiness checks\n\n')
+                  for item in report['targets']:
+                      summary.write(f"- **{item['project_id']}**: {item['status'].upper()}\n")
+                      for reason in item['attention']:
+                          summary.write(f"  - {reason}\n")
+                  summary.write('\nCaptured revenue and settlement are not established by readiness checks.\n')
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
