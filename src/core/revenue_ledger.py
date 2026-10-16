@@ -42,6 +42,7 @@ class LedgerEntry:
 class RevenueLedger:
     def __init__(self) -> None:
         self._entries: dict[str, LedgerEntry] = {}
+        self._source_events: dict[tuple[str, str, str], str] = {}
 
     @staticmethod
     def _money(value: Any) -> Decimal:
@@ -62,6 +63,14 @@ class RevenueLedger:
         source_event_id = event.get("source_event_id")
         if not evidence or not source_event_id or confidence != 1:
             raise ValueError("Revenue requires authoritative source_event_id, confidence=1, and evidence")
+        source_key = (
+            str(event.get("project_id") or ""),
+            str(event.get("source_system") or event.get("project_id") or ""),
+            str(source_event_id),
+        )
+        if source_key in self._source_events:
+            original = self._entries[self._source_events[source_key]]
+            return {"recorded": False, "reason": "duplicate", "entry": original.to_dict()}
 
         currency = str(event.get("currency") or "").upper()
         if len(currency) != 3:
@@ -92,6 +101,7 @@ class RevenueLedger:
             evidence=evidence,
         )
         self._entries[event_id] = entry
+        self._source_events[source_key] = event_id
         return {"recorded": True, "entry": entry.to_dict()}
 
     def summary(self, currency: str = "USD") -> dict[str, Any]:

@@ -6,6 +6,7 @@ from fastapi import HTTPException, Request, Response
 
 from api.index import ConversationRequest, LoginRequest, app, conversation, owner_login
 from src.core.conversation import converse
+from src.core.command_router import route_command
 from src.core.owner_session import COOKIE, authenticated, issue_session, require_same_origin
 from src.integrations.hermes_agent import HermesResult
 
@@ -50,6 +51,26 @@ class ConversationTests(unittest.TestCase):
             result = converse("Jarvis, go to sleep", {}, [], None)
         self.assertEqual(result["client_action"], "sleep")
         worker.assert_not_called()
+
+    def test_unmute_enables_voice(self):
+        with patch("src.core.conversation.delegate_to_hermes") as worker:
+            result = converse("unmute yourself", {}, [], None)
+        self.assertEqual(result["client_action"], "voice_on")
+        worker.assert_not_called()
+
+    def test_disconnected_revenue_is_unknown_in_speech(self):
+        from api.index import build_state
+        for command in ("show revenue", "status report"):
+            with self.subTest(command=command):
+                result = route_command(command, build_state())
+                self.assertIn("not currently verified", result.reply)
+                self.assertNotIn("$0.00", result.reply)
+
+    def test_verified_zero_is_reported_when_feed_is_connected(self):
+        result = route_command("show revenue", {"verified_revenue": {
+            "status": "connected", "gross_revenue": 0,
+        }})
+        self.assertIn("$0.00 verified revenue", result.reply)
 
     def test_model_cannot_inject_executable_client_action(self):
         model = HermesResult(status="ok", response='{"intent":"open_url","reply":"Proposed only","client_action":"shell","payload":{"command":"rm -rf /"}}')

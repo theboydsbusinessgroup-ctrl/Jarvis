@@ -26,12 +26,16 @@ class PolicyEngine:
 
         project_rule = ((self.policy.get("project_gates") or {}).get(project_id or "") or {}).get(action)
         if project_rule:
+            if project_rule["decision"] == "prohibited":
+                return self._result("prohibited", action, "project_prohibition", project_rule.get("conditions", []))
             if not self._conditions_met(project_rule.get("conditions", []), context):
                 return self._result("require_approval", action, "project_conditions_not_met", project_rule.get("conditions", []))
             return self._result(project_rule["decision"], action, "project_gate", project_rule.get("conditions", []))
 
         grant = (self.policy.get("grants") or {}).get(action)
         if grant:
+            if grant["decision"] == "prohibited":
+                return self._result("prohibited", action, "grant_prohibition", grant.get("conditions", []))
             if not self._conditions_met(grant.get("conditions", []), context):
                 return self._result("require_approval", action, "grant_conditions_not_met", grant.get("conditions", []))
             return self._result(grant["decision"], action, "explicit_grant", grant.get("conditions", []))
@@ -46,7 +50,26 @@ class PolicyEngine:
         return self._result(decision, action, f"default_tier:{tier}")
 
     def _conditions_met(self, conditions: list[str], context: Mapping[str, Any]) -> bool:
+        # These conditions require affirmative evidence from the trusted caller.
+        affirmative = {
+            "no_security_bypass", "least_privilege", "use_existing_authorization_first",
+            "applies_to_all_live_systems", "preserve_existing_safety_gates",
+            "no_new_spend_without_authorization", "no_security_or_verification_bypass",
+            "prefer_reusable_skill_or_adapter_before_human_escalation",
+        }
+        supported = affirmative | {
+            "no_new_spend", "tests_or_ci_pass", "no_secret_exposure", "no_customer_opt_out",
+            "approved_provider_count>=2", "margin_gate_passes", "scope_gate_passes",
+            "exact_spend_has_existing_authorization", "user_authentication_required",
+            "until_separate_validation_and_live_allocation_authorization",
+            "message_within_existing_offer_and_brand_rules", "within_existing_follow_up_policy",
+            "listing_content_preapproved_or_within_existing_product_scope",
+        }
         for condition in conditions:
+            if condition not in supported:
+                return False
+            if condition in affirmative and context.get(condition) is not True:
+                return False
             if condition == "no_new_spend" and context.get("new_spend", 0):
                 return False
             if condition == "tests_or_ci_pass" and context.get("ci") not in {"passing", "success", True}:

@@ -13,4 +13,9 @@ Voice Control and Switch Control can navigate iPadOS, but Apple does not expose 
 XCUIAutomation can manipulate UI for Xcode UI testing. It is a testing framework, not the architecture for an always-on assistant controlling arbitrary App Store apps.
 
 ## Practical capability
-Jarvis Vision can see the selected shared content continuously while the share is active. Jarvis Actions can directly execute supported Shortcuts/App Intents. For unsupported app UI, Jarvis provides precise tap/type guidance instead of bypassing iPadOS security.
+The planned capability is to provide selected shared content while an explicitly
+authorized share is active and execute participating apps' supported
+Shortcuts/App Intents. The current repository contains a scaffold: the capture
+picker callback, app target, and action integration are not connected. It does
+not currently provide continuous screen visibility or execute device actions.
+For unsupported app UI, the intended fallback is tap/type guidance.

@@ -147,7 +147,7 @@ def call_second_brain(*, task: str, decision_criteria: str = "", review_mode: st
         )
         choices = data.get("choices") or []
         message = (choices[0].get("message") or {}) if choices else {}
-        text = (message.get("content") or message.get("reasoning") or "").strip()
+        text = (message.get("content") or "").strip()
         if not text:
             raise RuntimeError("Claude returned no usable text")
         return SecondBrainResult(

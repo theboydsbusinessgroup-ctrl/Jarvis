@@ -36,11 +36,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Install runtime dependencies
         run: pip install -r requirements.txt
       - name: Validate portfolio infrastructure
         run: |
           python -m unittest discover tests -v
+          node --test tests/test_dashboard.mjs
           python scripts/portfolio_health.py > /tmp/portfolio-health.json
           bash -n scripts/hermes_bootstrap.sh
           shellcheck scripts/hermes_bootstrap.sh

@@ -31,6 +31,15 @@ def route_command(transcript: str, state: dict[str, Any]) -> CommandDecision:
     portfolio = state.get("portfolio", {})
     revenue = state.get("verified_revenue", {})
     recovery = state.get("revenue_recovery", {})
+    gross = revenue.get("gross_revenue")
+    revenue_available = (
+        gross is not None
+        and revenue.get("status") not in {"not_connected", "unavailable", "unknown"}
+    )
+    revenue_report = (
+        f"${float(gross):,.2f} verified revenue"
+        if revenue_available else "revenue not currently verified because the feed is unavailable"
+    )
 
     if not raw:
         return CommandDecision(raw, "empty", "rejected", "I didn't catch that. Try again.")
@@ -46,10 +55,10 @@ def route_command(transcript: str, state: dict[str, Any]) -> CommandDecision:
 
     if any(x in text for x in ("reboot", "restart jarvis", "restart yourself")):
         return CommandDecision(raw, "reboot", "execute", "Reinitializing. Try to contain your excitement.", "reboot")
-    if any(x in text for x in ("mute yourself", "voice off", "stop talking")):
-        return CommandDecision(raw, "voice_off", "execute", "Voice channel muted.", "voice_off")
     if any(x in text for x in ("voice on", "start talking", "unmute yourself")):
         return CommandDecision(raw, "voice_on", "execute", "Voice channel online.", "voice_on")
+    if any(x in text for x in ("mute yourself", "voice off", "stop talking")):
+        return CommandDecision(raw, "voice_off", "execute", "Voice channel muted.", "voice_off")
     if any(x in text for x in ("sound off", "effects off", "sfx off")):
         return CommandDecision(raw, "sound_off", "execute", "Sound effects disabled.", "sound_off")
     if any(x in text for x in ("sound on", "effects on", "sfx on")):
@@ -65,8 +74,7 @@ def route_command(transcript: str, state: dict[str, Any]) -> CommandDecision:
             reply = f"{len(needs)} item{'s' if len(needs)!=1 else ''} need you. " + ", ".join(names) + "."
         return CommandDecision(raw, "needs_user", "execute", reply, "show_actions", {"needs_user": needs})
     if "revenue" in text or "money" in text or "first dollar" in text:
-        gross = float(revenue.get("gross_revenue", 0) or 0)
-        reply = f"Verified revenue is ${gross:,.2f}. I am not counting identified opportunities as revenue."
+        reply = f"I have {revenue_report}. I am not counting identified opportunities as revenue."
         return CommandDecision(raw, "revenue_summary", "execute", reply, "show_revenue", {"revenue": revenue, "recovery": recovery})
     if "project" in text or "portfolio" in text:
         count = portfolio.get("project_count", 0)
@@ -76,8 +84,7 @@ def route_command(transcript: str, state: dict[str, Any]) -> CommandDecision:
     if any(x in text for x in ("status", "how are we doing", "system check", "report")):
         count = portfolio.get("project_count", 0)
         needs = len(portfolio.get("needs_user", []))
-        gross = float(revenue.get("gross_revenue", 0) or 0)
-        reply = f"Systems online. {count} projects tracked, ${gross:,.2f} verified revenue, and {needs} owner actions pending."
+        reply = f"Systems online. {count} projects tracked, {revenue_report}, and {needs} owner actions pending."
         return CommandDecision(raw, "status", "execute", reply, "status")
     if any(x in text for x in ("help", "what can i say", "commands")):
         return CommandDecision(raw, "help", "execute", "Try: status report, show revenue, what needs me, show projects, refresh systems, mute yourself, or reboot.", "help")
