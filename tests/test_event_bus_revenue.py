@@ -41,6 +41,24 @@ class EventBusRevenueTests(unittest.TestCase):
         self.assertFalse(ledger.record_event(event)["recorded"])
         self.assertEqual(ledger.summary()["verified_entries"], 0)
 
+    def test_ledger_deduplicates_rewrapped_provider_event_without_bus(self):
+        ledger = RevenueLedger()
+        ledger.record_event(payment_event())
+        result = ledger.record_event(payment_event(event_id="new-delivery-id"))
+        self.assertEqual(result["reason"], "duplicate")
+        self.assertEqual(ledger.summary()["gross_revenue"], 49.0)
+
+    def test_source_event_identity_is_scoped_to_project_and_source(self):
+        ledger = RevenueLedger()
+        ledger.record_event(payment_event())
+        other = payment_event(event_id="other-project-event")
+        other["project_id"] = "other-project"
+        self.assertTrue(ledger.record_event(other)["recorded"])
+        other_source = payment_event(event_id="other-source-event")
+        other_source["source_system"] = "other-provider"
+        self.assertTrue(ledger.record_event(other_source)["recorded"])
+        self.assertEqual(ledger.summary()["gross_revenue"], 147.0)
+
     def test_unverified_payment_is_rejected(self):
         ledger = RevenueLedger()
         event = payment_event()

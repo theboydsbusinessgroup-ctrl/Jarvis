@@ -29,6 +29,13 @@ agent / workflow
 9. The current JSON checkpoint adapter is suitable for tests and persistent single-node deployments. Serverless/live production writes require a shared durable backend before enablement.
 10. Live connector writes remain disabled until the connector is explicitly wired through this layer and its provider-specific contract tests pass.
 
+Policy conditions must have a supported evaluator. Unknown conditions require
+review and cannot grant automatic execution. Access recovery and roadblock
+resolution require affirmative boolean evidence for their named security and
+scope conditions in the trusted caller context. A project or grant rule marked
+`prohibited` stays prohibited regardless of missing context; enabling it requires
+an explicit policy change rather than an approval of a blocked checkpoint.
+
 ## Risk examples
 
 - GREEN: read/search/analyze/report.
