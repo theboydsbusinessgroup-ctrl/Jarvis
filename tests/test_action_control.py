@@ -66,6 +66,15 @@ class ActionControlPlaneTests(unittest.TestCase):
         self.assertEqual(len(calls), 1)
         self.assertEqual(first["record"]["result"], second["record"]["result"])
 
+    def test_project_prohibition_cannot_be_overridden_by_approval(self):
+        self.control.tool_registry.config["tools"]["trading.live"] = {
+            "risk": "RED", "policy_action": "live_trade",
+        }
+        record = self.control.propose("trading", "live", {}, project_id="autonomous_trading")
+        self.assertEqual(record["status"], "prohibited")
+        with self.assertRaises(PermissionError):
+            self.control.approve(record["operation_id"], approved=True)
+
 
 if __name__ == "__main__":
     unittest.main()

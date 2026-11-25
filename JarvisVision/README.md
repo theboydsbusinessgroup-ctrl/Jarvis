@@ -19,3 +19,9 @@ No silent capture. iPadOS screen-sharing permission is required. Relay must use 
 
 ## Status
 MVP scaffold: capture coordinator, frame relay client, session model, and server relay API.
+
+This is not yet a working capture application. The repository has no Xcode project
+or configured app target. `Start Vision` activates the picker, but no picker
+observer calls `attach(filter:)`, so it does not start a capture stream. Confirm
+the intended device's SDK support, create and build the target, and connect the
+permission/picker lifecycle before testing frame delivery on a real device.

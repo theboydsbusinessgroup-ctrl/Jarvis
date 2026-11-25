@@ -6,6 +6,7 @@ from fastapi import HTTPException, Request
 
 from api.index import SecondBrainRequest, etsy_callback, second_brain, build_state
 from src.integrations.second_brain import SecondBrainResult
+from src.integrations.second_brain import call_second_brain
 
 
 def request(headers=()):
@@ -37,3 +38,14 @@ class SecondBrainSecurityTests(unittest.TestCase):
         result = build_state()['verified_revenue']
         self.assertEqual(result['status'], 'not_connected')
         self.assertIsNone(result['observed_at'])
+
+    def test_reasoning_only_response_is_not_returned_as_final_answer(self):
+        with patch.dict(os.environ, {'OPENROUTER_API_KEY': 'test-key'}), \
+             patch('src.integrations.second_brain.build_context_packet', return_value='test packet'), \
+             patch('src.integrations.second_brain._request_json', return_value={
+                 'choices': [{'message': {'content': '', 'reasoning': 'private internal reasoning'}}],
+             }):
+            result = call_second_brain(task='Review the portfolio')
+        self.assertEqual(result.status, 'error')
+        self.assertIsNone(result.response)
+        self.assertNotIn('private internal reasoning', result.error)

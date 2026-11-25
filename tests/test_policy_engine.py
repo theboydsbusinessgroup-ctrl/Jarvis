@@ -31,7 +31,23 @@ class PolicyEngineTests(unittest.TestCase):
 
     def test_live_trading_is_prohibited_until_separate_validation(self):
         d = self.engine.decide("live_trade", project_id="autonomous_trading", context={})
-        self.assertEqual(d["decision"], "require_approval")
+        self.assertEqual(d["decision"], "prohibited")
+
+    def test_unrecognized_condition_cannot_grant_execution(self):
+        policy = {**self.engine.policy, "grants": {"test": {
+            "decision": "execute", "conditions": ["future_guardrail"],
+        }}}
+        decision = PolicyEngine(policy).decide("test", context={"future_guardrail": True})
+        self.assertEqual(decision["decision"], "require_approval")
+
+    def test_access_recovery_requires_affirmative_security_evidence(self):
+        blocked = self.engine.decide("pre_escalation_access_recovery", context={})
+        self.assertEqual(blocked["decision"], "require_approval")
+        allowed = self.engine.decide("pre_escalation_access_recovery", context={
+            "no_security_bypass": True, "least_privilege": True,
+            "use_existing_authorization_first": True, "new_spend": 0,
+        })
+        self.assertEqual(allowed["decision"], "execute")
 
     def test_deploy_requires_passing_ci(self):
         blocked = self.engine.decide("production_deploy", context={"ci":"failing", "new_spend":0, "secret_exposure":False})
