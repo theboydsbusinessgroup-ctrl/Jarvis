@@ -26,8 +26,8 @@ Optional settings:
 - `JARVIS_SECOND_BRAIN_MODEL` (default `anthropic/claude-sonnet-5`)
 
 ## Review modes
-- `parallel`: Claude receives a neutral task without ChatGPT's conclusion.
-- `adversarial`: the evidence field may include a proposed plan for Claude to attack.
+- `parallel`: the reviewer receives a neutral task without the orchestrator's conclusion.
+- `adversarial`: the evidence field may include a proposed plan for the reviewer to attack.
 
 ## Security boundary
 The runtime remains advisory-only. Any future write-back mechanism must be separately authenticated, policy-checked, auditable, and idempotent.

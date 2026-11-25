@@ -1,7 +1,7 @@
 # Shared State Architecture
 
 ## Objective
-Prevent ChatGPT, Claude, Jarvis, and specialist agents from accumulating conflicting versions of project truth.
+Prevent Claude, Jarvis, and specialist agents (and, before its 2026-11-24 retirement, ChatGPT) from accumulating conflicting versions of project truth.
 
 ## Principle
 Models reason over shared state; models are not the authoritative database.

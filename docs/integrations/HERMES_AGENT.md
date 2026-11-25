@@ -1,12 +1,12 @@
 # Hermes Agent worker integration
 
-Hermes Agent is the bounded execution-worker layer beneath JARVIS. It does not replace JARVIS, ChatGPT orchestration, source-system authority, or the Autonomy Control Plane.
+Hermes Agent is the bounded execution-worker layer beneath JARVIS. It does not replace JARVIS, Claude orchestration, source-system authority, or the Autonomy Control Plane.
 
 ## Topology
 
-Eric -> ChatGPT/JARVIS -> OrchestrationGate -> Hermes worker -> isolated tools/runtime
+Eric -> Claude/JARVIS -> OrchestrationGate -> Hermes worker -> isolated tools/runtime
 
-Claude remains the independent second-brain reviewer through the existing second-brain integration.
+Independent review runs through the existing second-brain integration as a separate Claude call.
 
 ## Runtime policy
 

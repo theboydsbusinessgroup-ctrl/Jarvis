@@ -3,11 +3,14 @@
 ## Eric
 Final authority. Required for identity verification, irreversible/high-risk commitments, material spending beyond approved limits, legal signatures, and other decisions that cannot responsibly be delegated.
 
-## Jarvis / ChatGPT
+## Claude (primary orchestrator since 2026-11-24)
 Primary orchestration layer. Maintains task routing, synthesis, project coordination, status reporting, and escalation discipline.
 
-## Secondary reasoning model (Claude or equivalent)
-Independent CTO/red-team reviewer. Expected to challenge assumptions, identify technical/security/economic risks, and recommend replacement approaches when materially stronger.
+## Independent reviewer (separate Claude call or equivalent)
+Independent CTO/red-team reviewer that has not seen the work under review. Expected to challenge assumptions, identify technical/security/economic risks, and recommend replacement approaches when materially stronger.
+
+## ChatGPT
+Retired 2026-11-24. No current role.
 
 ## Research layer
 Current-information retrieval and source verification. Research outputs are evidence, not authority.

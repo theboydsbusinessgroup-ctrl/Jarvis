@@ -1,7 +1,7 @@
 # Second Brain Protocol
 
 ## Purpose
-Jarvis may consult a secondary model for independent review of consequential decisions. The secondary model is advisory; Eric retains final authority and Jarvis/ChatGPT remains the primary orchestration layer unless explicitly changed.
+Jarvis may consult a secondary model for independent review of consequential decisions. The secondary model is advisory; Eric retains final authority. Claude has been the primary orchestration layer since 2026-11-24 (ChatGPT retired); the secondary review runs as a separate Claude call that has not seen the work, so the work does not grade itself.
 
 ## Review modes
 

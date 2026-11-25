@@ -2,14 +2,16 @@
 
 ## Governance and command structure
 
-Effective September 19, 2026, the portfolio command structure is:
+Effective November 24, 2026, the portfolio command structure is:
 
 1. **Eric Boyd — principal and final authority**
-2. **ChatGPT — main brain, lead business-development and management orchestrator**
+2. **Claude — main brain, lead business-development and management orchestrator**
 3. **JARVIS — operating interface, monitoring, reporting, and connective tissue**
 4. **Domain systems, agents, contractors, and tools — execution under their documented authority boundaries**
 
-Perplexity is retired from the operating team at Eric Boyd's direction. Do not route tasks, research, reviews, approvals, escalations, or context packets to Perplexity; do not make any work depend on its subscription or availability. ChatGPT owns research and review coordination using available authorized tools, with unresolved consequential decisions escalated to Eric. This supersedes earlier Perplexity consultation requirements. No replacement paid service is authorized by this change.
+ChatGPT is retired from the operating team at Eric Boyd's direction, effective November 24, 2026. Do not route tasks, research, reviews, approvals, escalations, or context packets to ChatGPT, and do not make any work depend on a ChatGPT subscription or its availability. Claude owns orchestration, research and review coordination using available authorized tools, with unresolved consequential decisions escalated to Eric. Independent review of consequential decisions runs through a separate Claude call that has not seen the work (see `docs/SECOND_BRAIN_PROTOCOL.md`). The OpenAI API account is separate from the ChatGPT subscription and is not changed by this decision.
+
+Perplexity was retired earlier, on September 19, 2026. Do not route work to Perplexity or depend on its subscription. No replacement paid service is authorized by either change.
 
 Verified repositories, deployments, integrations, and system-of-record documents supersede unsupported status claims made in conversation. JARVIS must not become an execution bottleneck: revenue-producing work continues through each domain system while JARVIS observes, coordinates, and reports.
 

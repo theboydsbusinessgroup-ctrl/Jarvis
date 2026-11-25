@@ -270,7 +270,7 @@ def etsy_callback(code: str | None = None, state: str | None = None, error: str 
         return f"<h1>Etsy authorization failed</h1><p>{escape(error)}</p>"
     if not code:
         return "<h1>Etsy OAuth callback is ready</h1><p>This endpoint is configured for Etsy authorization.</p>"
-    return "<h1>Etsy authorization received</h1><p>The authorization callback reached JARVIS successfully. Return to ChatGPT to finish the connection.</p>"
+    return "<h1>Etsy authorization received</h1><p>The authorization callback reached JARVIS successfully. Return to Claude to finish the connection.</p>"
 
 
 @app.get("/privacy-policy", response_class=HTMLResponse)
