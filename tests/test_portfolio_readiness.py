@@ -62,3 +62,48 @@ class ReadinessTests(unittest.TestCase):
         with patch("scripts.check_portfolio_health.fetch_json", return_value=[]):
             result = check_target({"id": "offer", "url": "https://offer.test/health"})
         self.assertTrue(result["incident"])
+
+
+def atom(*published):
+    entries = "".join(f"<entry><title>private title</title><published>{p}</published></entry>" for p in published)
+    return f'<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom">{entries}</feed>'.encode()
+
+
+FEED = {"id": "media", "url": "https://feed.test/videos.xml", "kind": "publication_feed", "stale_after_hours": 48}
+
+
+class PublicationFeedTests(unittest.TestCase):
+    def check(self, body):
+        with patch("scripts.check_portfolio_health.fetch_feed", return_value=body):
+            return check_target(FEED)
+
+    def test_recent_public_post_is_ready(self):
+        now = datetime.now(timezone.utc)
+        result = self.check(atom((now - timedelta(days=30)).isoformat(), (now - timedelta(hours=13)).isoformat()))
+        self.assertFalse(result["incident"])
+        self.assertFalse(result["attention"])
+        self.assertEqual(result["readiness"]["conclusion"], "success")
+        self.assertNotIn("private title", str(result))
+
+    def test_no_recent_post_is_an_incident(self):
+        result = self.check(atom((datetime.now(timezone.utc) - timedelta(hours=60)).isoformat()))
+        self.assertTrue(result["incident"])
+        self.assertEqual(result["readiness"]["conclusion"], "stale")
+
+    def test_empty_feed_is_an_incident(self):
+        self.assertTrue(self.check(atom())["incident"])
+
+    def test_future_timestamp_is_not_reported_as_evidence(self):
+        result = self.check(atom((datetime.now(timezone.utc) + timedelta(hours=5)).isoformat()))
+        self.assertTrue(result["incident"])
+        self.assertIsNone(result["readiness"]["completed_at"])
+
+    def test_malformed_feed_fails_closed(self):
+        self.assertTrue(self.check(b"<feed")["incident"])
+
+    def test_dtd_is_refused(self):
+        body = b'<?xml version="1.0"?><!DOCTYPE feed [<!ENTITY x "y">]><feed xmlns="http://www.w3.org/2005/Atom"/>'
+        with patch("scripts.check_portfolio_health.urlopen") as opened:
+            opened.return_value.__enter__.return_value.read.return_value = body
+            result = check_target(FEED)
+        self.assertTrue(result["incident"])
