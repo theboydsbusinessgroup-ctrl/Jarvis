@@ -3,12 +3,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
+import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
+ATOM = {"a": "http://www.w3.org/2005/Atom"}
+FEED_LIMIT = 262144
 
 
 def fetch_json(url):
@@ -22,10 +26,65 @@ def fetch_json(url):
         return json.loads(body)
 
 
+def fetch_feed(url, attempts=2):
+    """Fetch a public Atom feed (bounded, no DTDs). One retry absorbs transient feed errors."""
+    if not url.startswith("https://"):
+        raise ValueError("Publication feeds must use HTTPS")
+    for attempt in range(attempts):
+        try:
+            request = Request(url, headers={"Accept": "application/atom+xml", "User-Agent": "jarvis-readiness-monitor/1"})
+            with urlopen(request, timeout=15) as response:
+                body = response.read(FEED_LIMIT + 1)
+            break
+        except Exception:
+            if attempt + 1 >= attempts:
+                raise
+            time.sleep(3)
+    if len(body) > FEED_LIMIT:
+        raise ValueError("Publication feed exceeds size limit")
+    if b"<!DOCTYPE" in body or b"<!ENTITY" in body:
+        raise ValueError("Publication feed must not declare a DTD")
+    return body
+
+
+def latest_feed_publication(body):
+    """Return the newest Atom entry <published> time, or None when the feed has no entries."""
+    root = ET.fromstring(body)
+    stamps = []
+    for entry in root.findall("a:entry", ATOM):
+        value = entry.findtext("a:published", namespaces=ATOM)
+        if value:
+            stamp = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+            if stamp.tzinfo is None:
+                raise ValueError("Publication timestamp must be timezone-aware")
+            stamps.append(stamp)
+    return max(stamps) if stamps else None
+
+
+def check_feed_target(target, result):
+    """Publication evidence from a public channel feed: the newest public post must be recent."""
+    latest = latest_feed_publication(fetch_feed(target["url"]))
+    if latest is None:
+        raise ValueError("No publication evidence in feed")
+    now = datetime.now(timezone.utc)
+    age = (now - latest).total_seconds() / 3600
+    fresh = -1 <= age <= target.get("stale_after_hours", 48)
+    # A timestamp ahead of this clock is not reported as evidence (downstream rejects future times).
+    completed_at = latest.astimezone(timezone.utc).isoformat() if latest <= now else None
+    result["readiness"] = {"status": "completed", "conclusion": "success" if fresh else "stale",
+                           "completed_at": completed_at}
+    if not fresh:
+        result["incident"] = True
+        result["attention"].append("No public post within the freshness window; check the publishing queue.")
+    return result
+
+
 def check_target(target):
     result = {"project_id": target["id"], "url": target["url"],
               "observed_at": datetime.now(timezone.utc).isoformat(), "incident": False, "attention": []}
     try:
+        if target.get("kind") == "publication_feed":
+            return check_feed_target(target, result)
         data = fetch_json(target["url"])
         if not isinstance(data, dict):
             raise ValueError("Expected a JSON object")
