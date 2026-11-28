@@ -1,6 +1,7 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
+from urllib.error import HTTPError, URLError
 
 from scripts.check_portfolio_health import check_target
 
@@ -77,6 +78,32 @@ class PublicationFeedTests(unittest.TestCase):
         with patch("scripts.check_portfolio_health.fetch_feed", return_value=body):
             return check_target(FEED)
 
+    def fail(self, exc):
+        with patch("scripts.check_portfolio_health.fetch_feed", side_effect=exc):
+            return check_target(FEED)
+
+    def http_error(self, code):
+        return HTTPError(FEED["url"], code, "err", {}, None)
+
+    def test_feed_503_is_attention_not_incident(self):
+        result = self.fail(self.http_error(503))
+        self.assertFalse(result["incident"])
+        self.assertEqual(result["attention"], ["Publication feed unavailable (HTTP 503); freshness unverified"])
+
+    def test_feed_429_is_attention_not_incident(self):
+        result = self.fail(self.http_error(429))
+        self.assertFalse(result["incident"])
+        self.assertEqual(len(result["attention"]), 1)
+
+    def test_feed_network_errors_are_attention(self):
+        for exc in (URLError("unreachable"), TimeoutError(), ConnectionResetError()):
+            result = self.fail(exc)
+            self.assertFalse(result["incident"], exc)
+            self.assertEqual(len(result["attention"]), 1)
+
+    def test_feed_404_is_still_an_incident(self):
+        self.assertTrue(self.fail(self.http_error(404))["incident"])
+
     def test_recent_public_post_is_ready(self):
         now = datetime.now(timezone.utc)
         result = self.check(atom((now - timedelta(days=30)).isoformat(), (now - timedelta(hours=13)).isoformat()))
@@ -107,3 +134,18 @@ class PublicationFeedTests(unittest.TestCase):
             opened.return_value.__enter__.return_value.read.return_value = body
             result = check_target(FEED)
         self.assertTrue(result["incident"])
+
+class FeedConfigurationFaultTests(unittest.TestCase):
+    def _check(self, exc):
+        with patch("scripts.check_portfolio_health.fetch_feed", side_effect=exc):
+            return check_target(FEED)
+
+    def test_dns_failure_stays_an_incident(self):
+        import socket
+        from urllib.error import URLError
+        self.assertTrue(self._check(URLError(socket.gaierror(-2, "Name or service not known")))["incident"])
+
+    def test_certificate_failure_stays_an_incident(self):
+        import ssl
+        from urllib.error import URLError
+        self.assertTrue(self._check(URLError(ssl.SSLCertVerificationError("certificate verify failed")))["incident"])
