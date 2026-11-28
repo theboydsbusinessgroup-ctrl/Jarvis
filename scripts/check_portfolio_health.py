@@ -4,10 +4,13 @@ from __future__ import annotations
 import argparse
 import json
 import time
+import socket
+import ssl
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -63,7 +66,20 @@ def latest_feed_publication(body):
 
 def check_feed_target(target, result):
     """Publication evidence from a public channel feed: the newest public post must be recent."""
-    latest = latest_feed_publication(fetch_feed(target["url"]))
+    try:
+        body = fetch_feed(target["url"])
+    except HTTPError as exc:  # HTTPError subclasses URLError, so it must be handled first.
+        if exc.code >= 500 or exc.code == 429:
+            result["attention"].append(f"Publication feed unavailable (HTTP {exc.code}); freshness unverified")
+            return result
+        raise
+    except (URLError, TimeoutError, ConnectionError) as exc:  # socket timeouts are TimeoutError
+        reason = getattr(exc, "reason", None)
+        if isinstance(reason, (socket.gaierror, ssl.SSLCertVerificationError)):
+            raise  # a wrong host or a failed certificate is a configuration fault, not an outage
+        result["attention"].append(f"Publication feed unavailable ({type(exc).__name__}); freshness unverified")
+        return result
+    latest = latest_feed_publication(body)
     if latest is None:
         raise ValueError("No publication evidence in feed")
     now = datetime.now(timezone.utc)
